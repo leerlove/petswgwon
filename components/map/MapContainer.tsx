@@ -44,13 +44,14 @@ function createMarkerContent(place: Place, isActive: boolean): string {
   const emoji = CAT_EMOJI[place.category] ?? '📍';
   const safeName = escapeHtml(place.name);
   const safeId = escapeHtml(place.id);
-  const size = isActive ? 46 : 38;
-  const fontSize = isActive ? '18px' : '14px';
-  return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:transform 0.2s;transform:${isActive ? 'scale(1.15)' : 'scale(1)'};" class="marker-pin" data-place-id="${safeId}" onclick="event.stopPropagation();window.__pz_marker_click&&window.__pz_marker_click('${safeId}')">
-    ${isActive ? `<div style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:48px;height:48px;border-radius:50%;background:${color}30;animation:marker-pulse 1.5s ease-in-out infinite;"></div>` : ''}
-    <div style="display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:16px;background:${color};border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);"><span style="font-size:${fontSize}">${emoji}</span></div>
+  const size = isActive ? 48 : 38;
+  const fontSize = isActive ? '20px' : '14px';
+  return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:transform 0.2s;transform:${isActive ? 'scale(1.2)' : 'scale(1)'};" class="marker-pin" data-place-id="${safeId}" onclick="event.stopPropagation();window.__pz_marker_click&&window.__pz_marker_click('${safeId}')">
+    ${isActive ? `<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:${color}25;animation:marker-pulse 1.5s ease-in-out infinite;"></div>` : ''}
+    ${isActive ? `<div style="position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);padding:5px 12px;background:${color};color:white;font-size:12px;font-weight:700;border-radius:10px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:40;">${safeName}<svg width="10" height="6" viewBox="0 0 10 6" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);"><polygon points="0,0 5,6 10,0" fill="${color}" /></svg></div>` : ''}
+    <div style="display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:16px;background:${color};border:${isActive ? '3px solid white' : '2px solid white'};box-shadow:${isActive ? `0 0 0 3px ${color}, 0 4px 12px rgba(0,0,0,0.3)` : '0 2px 8px rgba(0,0,0,0.2)'};"><span style="font-size:${fontSize}">${emoji}</span></div>
     <svg width="12" height="8" viewBox="0 0 12 8" style="margin-top:-1px"><polygon points="0,0 6,8 12,0" fill="${color}" /></svg>
-    <div style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);padding:4px 10px;background:rgba(17,24,39,0.9);color:white;font-size:11px;font-weight:500;border-radius:8px;white-space:nowrap;opacity:0;transition:opacity 0.2s;pointer-events:none;" class="marker-tooltip">${safeName}</div>
+    ${!isActive ? `<div style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);padding:4px 10px;background:rgba(17,24,39,0.9);color:white;font-size:11px;font-weight:500;border-radius:8px;white-space:nowrap;opacity:0;transition:opacity 0.2s;pointer-events:none;" class="marker-tooltip">${safeName}</div>` : ''}
   </div>`;
 }
 
