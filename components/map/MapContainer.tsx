@@ -302,7 +302,7 @@ export default function MapContainer() {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition((pos) => {
       setMapCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      setZoomLevel(16);
+      setZoomLevel(19);
       setHasMyLocation(true);
       setIsLocating(false);
     }, () => { setIsLocating(false); }, { enableHighAccuracy: true, timeout: 5000 });
