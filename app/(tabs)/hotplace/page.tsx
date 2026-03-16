@@ -167,23 +167,23 @@ export default function HotPlacePage() {
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto bg-warm-50 relative">
-        {/* ─── 글 상세 읽기 뷰 ─── */}
-        {viewingPost && (
-          <PostDetailView
-            post={viewingPost}
-            onClose={() => setViewingPost(null)}
-            onPlaceClick={(place) => {
-              setViewingPost(null);
-              setTimeout(() => handlePlaceClick(place), 150);
-            }}
-            liked={!!liked[viewingPost.id]}
-            onToggleLike={() =>
-              setLiked((prev) => ({ ...prev, [viewingPost.id]: !prev[viewingPost.id] }))
-            }
-          />
-        )}
+      {/* ─── 글 상세 읽기 뷰 ─── */}
+      {viewingPost && (
+        <PostDetailView
+          post={viewingPost}
+          onClose={() => setViewingPost(null)}
+          onPlaceClick={(place) => {
+            setViewingPost(null);
+            setTimeout(() => handlePlaceClick(place), 150);
+          }}
+          liked={!!liked[viewingPost.id]}
+          onToggleLike={() =>
+            setLiked((prev) => ({ ...prev, [viewingPost.id]: !prev[viewingPost.id] }))
+          }
+        />
+      )}
 
+      {!viewingPost && <div className="flex-1 overflow-y-auto bg-warm-50 relative">
         {/* 헤더 */}
         <div className="bg-surface px-4 pt-5 pb-0 border-b border-warm-100">
           <div className="flex items-center gap-2 mb-1">
@@ -366,7 +366,7 @@ export default function HotPlacePage() {
             </div>
           </div>
         )}
-      </div>
+      </div>}
       <PlaceDetailSheet />
     </>
   );
@@ -394,7 +394,7 @@ function PostDetailView({
   };
 
   return (
-    <div className="absolute inset-0 z-50 bg-surface flex flex-col animate-slide-up">
+    <div className="flex-1 z-50 bg-surface flex flex-col animate-slide-up overflow-hidden">
       {/* 커버 — 스크롤 시 축소 */}
       <div className="relative shrink-0">
         <div
