@@ -61,6 +61,8 @@ export default function SearchBar() {
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [recentViewedPlaces, setRecentViewedPlaces] = useState<RecentPlace[]>([]);
+  const [searchResults, setSearchResults] = useState<typeof places>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -74,58 +76,78 @@ export default function SearchBar() {
         inputRef.current?.focus();
       }, 0);
       return () => clearTimeout(t);
+    } else {
+      setSearchResults([]);
     }
   }, [isSearchOpen]);
 
   useEffect(() => { return () => { if (debounceRef.current) clearTimeout(debounceRef.current); }; }, []);
 
-  const filterByQuery = useCallback((q: string) => {
-    if (!q.trim()) return [];
-    const term = q.trim().toLowerCase();
-    return places.filter((p) =>
-      p.name.toLowerCase().includes(term) ||
-      p.address.toLowerCase().includes(term) ||
-      p.tags.some((t) => t.toLowerCase().includes(term))
-    );
-  }, [places]);
+  const searchFromAPI = useCallback(async (q: string) => {
+    if (!q.trim()) { setSearchResults([]); return []; }
+    setIsSearching(true);
+    try {
+      const params = new URLSearchParams({ q: q.trim() });
+      if (activeCategory !== 'all') params.set('category', activeCategory);
+      const res = await fetch(`/api/places/search?${params}`);
+      const data = await res.json();
+      const results = Array.isArray(data) ? data : [];
+      setSearchResults(results);
+      return results;
+    } catch {
+      setSearchResults([]);
+      return [];
+    } finally {
+      setIsSearching(false);
+    }
+  }, [activeCategory]);
 
-  const filteredPlaces = isSearchOpen ? filterByQuery(localQuery) : [];
+  const filteredPlaces = searchResults;
   const resultCount = filteredPlaces.length;
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = useCallback(async () => {
     const q = localQuery.trim();
     if (q) { saveRecentSearch(q); setRecentSearches(getRecentSearches()); }
     setSearchQuery(q);
-    setSearchOpen(false);
     selectMarker(null);
     if (q) {
-      const results = filterByQuery(q);
+      const results = searchResults.length > 0 ? searchResults : await searchFromAPI(q);
       if (results.length > 0) {
-        const avgLat = results.reduce((s, p) => s + p.lat, 0) / results.length;
-        const avgLng = results.reduce((s, p) => s + p.lng, 0) / results.length;
+        const avgLat = results.reduce((s: number, p: { lat: number }) => s + p.lat, 0) / results.length;
+        const avgLng = results.reduce((s: number, p: { lng: number }) => s + p.lng, 0) / results.length;
         setMapCenter({ lat: avgLat, lng: avgLng });
         setZoomLevel(results.length <= 3 ? 17 : results.length <= 20 ? 15 : 13);
       }
     }
-  }, [localQuery, setSearchQuery, setSearchOpen, selectMarker, filterByQuery, setMapCenter, setZoomLevel]);
+    setSearchOpen(false);
+  }, [localQuery, setSearchQuery, setSearchOpen, selectMarker, searchResults, searchFromAPI, setMapCenter, setZoomLevel]);
 
   const handleClearSearch = useCallback(() => { setLocalQuery(''); setSearchQuery(''); }, [setSearchQuery]);
 
-  const handleQuickSearch = useCallback((term: string) => {
+  const handleQuickSearch = useCallback(async (term: string) => {
     setLocalQuery(term);
     saveRecentSearch(term);
     setSearchQuery(term);
-    setSearchOpen(false);
     selectMarker(null);
-  }, [setSearchQuery, setSearchOpen, selectMarker]);
+    const results = await searchFromAPI(term);
+    if (results.length > 0) {
+      const avgLat = results.reduce((s: number, p: { lat: number }) => s + p.lat, 0) / results.length;
+      const avgLng = results.reduce((s: number, p: { lng: number }) => s + p.lng, 0) / results.length;
+      setMapCenter({ lat: avgLat, lng: avgLng });
+      setZoomLevel(results.length <= 3 ? 17 : results.length <= 20 ? 15 : 13);
+    }
+    setSearchOpen(false);
+  }, [setSearchQuery, setSearchOpen, selectMarker, searchFromAPI, setMapCenter, setZoomLevel]);
 
   const handleRemoveRecent = useCallback((term: string) => { removeRecentSearch(term); setRecentSearches(getRecentSearches()); }, []);
 
   const handleInputChange = useCallback((value: string) => {
     setLocalQuery(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setSearchQuery(value.trim()), 300);
-  }, [setSearchQuery]);
+    debounceRef.current = setTimeout(() => {
+      searchFromAPI(value);
+    }, 300);
+  }, [searchFromAPI]);
 
   if (isSearchOpen) {
     return (
@@ -147,9 +169,9 @@ export default function SearchBar() {
           </div>
         </div>
         {localQuery.trim() && (
-          <div className={`mx-4 mb-3 px-4 py-2.5 rounded-xl ${resultCount > 0 ? 'bg-primary-100' : 'bg-accent-rose/10'}`} role="status" aria-live="polite">
-            <p className={`text-sm font-medium ${resultCount > 0 ? 'text-primary-dark' : 'text-accent-rose'}`}>
-              {resultCount > 0 ? `${resultCount}개의 장소를 찾았어요` : '검색 결과가 없어요. 다른 키워드로 검색해보세요.'}
+          <div className={`mx-4 mb-3 px-4 py-2.5 rounded-xl ${isSearching ? 'bg-warm-100' : resultCount > 0 ? 'bg-primary-100' : 'bg-accent-rose/10'}`} role="status" aria-live="polite">
+            <p className={`text-sm font-medium ${isSearching ? 'text-warm-500' : resultCount > 0 ? 'text-primary-dark' : 'text-accent-rose'}`}>
+              {isSearching ? '검색 중...' : resultCount > 0 ? `${resultCount}개의 장소를 찾았어요` : '검색 결과가 없어요. 다른 키워드로 검색해보세요.'}
             </p>
           </div>
         )}
