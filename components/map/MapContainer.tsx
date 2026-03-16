@@ -55,7 +55,7 @@ function createMarkerContent(place: Place, isActive: boolean): string {
   </div>`;
 }
 
-function createClusterContent(count: number, categoryBreakdown: { category: CategoryType; count: number }[], clusterId: string): string {
+function createClusterContent(count: number, categoryBreakdown: { category: CategoryType; count: number }[], clusterId: string, hasSelectedPlace = false): string {
   const total = categoryBreakdown.reduce((s, b) => s + b.count, 0);
   if (total === 0) return '';
   const topCat = categoryBreakdown[0];
@@ -75,9 +75,10 @@ function createClusterContent(count: number, categoryBreakdown: { category: Cate
   const badges = categoryBreakdown.slice(0, 3).map((item) => `<span style="font-size:8px;line-height:1;">${CAT_EMOJI[item.category] ?? ''}</span>`).join('');
   const safeClusterId = clusterId.replace(/'/g, "\\'");
   return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.2s;" class="cluster-marker" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'" onclick="this.style.transform='scale(1.3)';setTimeout(()=>{this.style.transform='scale(1)'},200);event.stopPropagation();window.__pz_cluster_click&&window.__pz_cluster_click('${safeClusterId}')">
-    <div style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:white;border:3px solid ${topColor};box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+    <div style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:white;border:3px solid ${topColor};box-shadow:${hasSelectedPlace ? `0 0 0 3px ${topColor}40,` : ''} 0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
       <span style="font-size:${fontSize}px;font-weight:800;color:#1f2937;line-height:1.1;">${label}</span>
       <div style="display:flex;gap:1px;margin-top:1px;">${badges}</div>
+      ${hasSelectedPlace ? `<div style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:2px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.2);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}
     </div>
     <svg width="${barW}" height="${barH}" style="overflow:hidden;border-radius:${barH / 2}px;pointer-events:none;">${barSegments}</svg>
   </div>`;
@@ -259,7 +260,8 @@ export default function MapContainer() {
         const catCount = new Map<CategoryType, number>();
         clusterPlaces.forEach((p) => catCount.set(p.category, (catCount.get(p.category) || 0) + 1));
         const categoryBreakdown = Array.from(catCount.entries()).map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count);
-        const content = createClusterContent(clusterPlaces.length, categoryBreakdown, clusterId);
+        const hasSelected = !!activeMarkerId && clusterPlaces.some((p) => p.id === activeMarkerId);
+        const content = createClusterContent(clusterPlaces.length, categoryBreakdown, clusterId, hasSelected);
         const overlay = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(avgLat, avgLng), content, clickable: true, xAnchor: 0.5, yAnchor: 0.5, zIndex: 5 });
         overlay.setMap(map);
         overlaysRef.current.push(overlay);
