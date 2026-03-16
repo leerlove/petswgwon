@@ -394,7 +394,7 @@ function PostDetailView({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-surface flex flex-col animate-slide-up">
+    <div className="absolute inset-0 z-50 bg-surface flex flex-col animate-slide-up">
       {/* 커버 — 스크롤 시 축소 */}
       <div className="relative shrink-0">
         <div

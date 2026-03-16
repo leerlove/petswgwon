@@ -181,7 +181,7 @@ function PlaceDetailSheet() {
       </div>
 
       {showNavSheet && (
-        <div className="fixed inset-0 z-50 flex items-end" onClick={() => setShowNavSheet(false)} role="dialog" aria-label="길안내 앱 선택" tabIndex={-1}>
+        <div className="absolute inset-0 z-50 flex items-end" onClick={() => setShowNavSheet(false)} role="dialog" aria-label="길안내 앱 선택" tabIndex={-1}>
           <div className="absolute inset-0 bg-warm-900/40 animate-fade-in" />
           <div className="relative w-full max-w-[430px] mx-auto bg-surface rounded-t-3xl p-5 pb-8 animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-warm-200 rounded-full mx-auto mb-5" />
