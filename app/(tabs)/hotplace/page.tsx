@@ -6,6 +6,7 @@ import { SkeletonBox } from '@/components/ui/Skeleton';
 import PlaceDetailSheet from '@/components/place/PlaceDetailSheet';
 import { transformPlace } from '@/lib/supabase/transformPlace';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
+import { useBackButton } from '@/hooks/useBackButton';
 
 interface MagazinePlace {
   id: string;
@@ -387,6 +388,7 @@ function PostDetailView({
   onToggleLike: () => void;
 }) {
   useEscapeKey(onClose);
+  useBackButton(true, onClose);
   const [scrolled, setScrolled] = useState(false);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePlaceStore } from '@/stores/placeStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useBackButton } from '@/hooks/useBackButton';
 import { useFilterStore } from '@/stores/filterStore';
 import { useMapStore } from '@/stores/mapStore';
 import { categories, CAT_EMOJI, getCategoryColor } from '@/data/categories';
@@ -53,6 +54,9 @@ export default function SearchBar() {
   const filters = useFilterStore((s) => s.filters);
   const setMapCenter = useMapStore((s) => s.setMapCenter);
   const setZoomLevel = useMapStore((s) => s.setZoomLevel);
+
+  const closeSearch = useCallback(() => setSearchOpen(false), [setSearchOpen]);
+  useBackButton(isSearchOpen, closeSearch);
 
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);

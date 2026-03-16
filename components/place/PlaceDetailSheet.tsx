@@ -6,6 +6,7 @@ import { usePlaceStore } from '@/stores/placeStore';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
+import { useBackButton } from '@/hooks/useBackButton';
 import { sharePlace } from '@/lib/share';
 import { openNavigation } from '@/lib/navigation';
 import ImageGallery from './ImageGallery';
@@ -35,6 +36,7 @@ function PlaceDetailSheet() {
 
   useBodyScrollLock(isDetailOpen);
   useEscapeKey(closeDetail, isDetailOpen && !showNavSheet);
+  useBackButton(isDetailOpen, closeDetail);
 
   const handleToggleBookmark = useCallback(async () => {
     if (!detailPlace || isBookmarkingRef.current) return;
