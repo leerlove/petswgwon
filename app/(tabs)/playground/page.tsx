@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useUIStore } from '@/stores/uiStore';
+import { usePlaygroundStore } from '@/stores/playgroundStore';
 import { SkeletonBox } from '@/components/ui/Skeleton';
 import PlaceDetailSheet from '@/components/place/PlaceDetailSheet';
 import type { Place } from '@/types';
@@ -29,9 +30,10 @@ function formatDistance(km: number): string {
 
 export default function PlaygroundPage() {
   const openDetail = useUIStore((s) => s.openDetail);
-  const [playgroundPlaces, setPlaygroundPlaces] = useState<Place[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const playgroundPlaces = usePlaygroundStore((s) => s.places);
+  const isLoading = usePlaygroundStore((s) => s.isLoading);
+  const error = usePlaygroundStore((s) => s.error);
+  const loadPlaygrounds = usePlaygroundStore((s) => s.loadPlaygrounds);
   const [sortBy, setSortBy] = useState<SortMode>('distance');
   const [filterDog, setFilterDog] = useState<'all' | 'large' | 'indoor'>('all');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -56,21 +58,6 @@ export default function PlaygroundPage() {
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
     );
-  }, []);
-
-  const loadPlaygrounds = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/places?sub_category=playground');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setPlaygroundPlaces(data.places ?? []);
-    } catch {
-      setError('놀이터 목록을 불러오지 못했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
   }, []);
 
   useEffect(() => { loadPlaygrounds(); }, [loadPlaygrounds]);

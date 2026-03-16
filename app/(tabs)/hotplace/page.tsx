@@ -1,43 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useUIStore } from '@/stores/uiStore';
+import { useMagazineStore, type MagazinePlace, type MagazinePost } from '@/stores/magazineStore';
 import { SkeletonBox } from '@/components/ui/Skeleton';
 import PlaceDetailSheet from '@/components/place/PlaceDetailSheet';
 import { transformPlace } from '@/lib/supabase/transformPlace';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { useBackButton } from '@/hooks/useBackButton';
-
-interface MagazinePlace {
-  id: string;
-  name: string;
-  address: string;
-  category: string;
-  sub_category: string;
-  tags: string[];
-  phone: string;
-  lat: number;
-  lng: number;
-}
-
-interface MagazinePost {
-  id: string;
-  title: string;
-  subtitle: string;
-  summary: string;
-  content: string;
-  emoji: string;
-  gradient: string;
-  accent_color: string;
-  cover_image: string;
-  author: string;
-  tags: string[];
-  read_time: string;
-  like_count: number;
-  is_featured: boolean;
-  created_at: string;
-  places: MagazinePlace[];
-}
 
 type Tab = 'latest' | 'popular' | 'archive';
 
@@ -57,28 +27,15 @@ function formatDate(dateStr: string) {
 
 export default function HotPlacePage() {
   const openDetail = useUIStore((s) => s.openDetail);
-  const [posts, setPosts] = useState<MagazinePost[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const posts = useMagazineStore((s) => s.posts);
+  const isLoading = useMagazineStore((s) => s.isLoading);
+  const error = useMagazineStore((s) => s.error);
+  const loadPosts = useMagazineStore((s) => s.loadPosts);
   const [activeTab, setActiveTab] = useState<Tab>('latest');
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [viewingPost, setViewingPost] = useState<MagazinePost | null>(null);
-
-  const loadPosts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/magazine/posts');
-      const data = await res.json();
-      setPosts(data.posts ?? []);
-    } catch {
-      setError('매거진을 불러오지 못했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     loadPosts();

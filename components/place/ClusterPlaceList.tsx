@@ -2,6 +2,7 @@
 
 import { memo, useCallback } from 'react';
 import { useUIStore } from '@/stores/uiStore';
+import { usePlaceStore } from '@/stores/placeStore';
 import { getCategoryColor, CAT_EMOJI, getSubCategoryName } from '@/data/categories';
 import type { Place } from '@/types';
 
@@ -9,11 +10,13 @@ function ClusterPlaceList() {
   const clusterPlaces = useUIStore((s) => s.clusterPlaces);
   const closeClusterList = useUIStore((s) => s.closeClusterList);
   const openDetail = useUIStore((s) => s.openDetail);
+  const selectMarker = usePlaceStore((s) => s.selectMarker);
 
   const handleSelect = useCallback((place: Place) => {
+    selectMarker(place.id);
     closeClusterList();
     openDetail(place);
-  }, [closeClusterList, openDetail]);
+  }, [selectMarker, closeClusterList, openDetail]);
 
   if (clusterPlaces.length === 0) return null;
 
