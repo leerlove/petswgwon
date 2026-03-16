@@ -1,4 +1,4 @@
-import type { Place } from '@/types';
+import type { Place, CategoryType, SubCategoryType } from '@/types';
 
 /**
  * DB에 한글로 저장된 sub_category / category를 영문 ID로 정규화
@@ -28,12 +28,12 @@ const CATEGORY_KO_TO_ID: Record<string, string> = {
   '놀이/쇼핑': 'play_shopping',
 };
 
-function normalizeCategory(value: string): string {
-  return CATEGORY_KO_TO_ID[value] ?? value;
+function normalizeCategory(value: string): CategoryType {
+  return (CATEGORY_KO_TO_ID[value] ?? value) as CategoryType;
 }
 
-function normalizeSubCategory(value: string): string {
-  return SUB_CATEGORY_KO_TO_ID[value] ?? value;
+function normalizeSubCategory(value: string): SubCategoryType {
+  return (SUB_CATEGORY_KO_TO_ID[value] ?? value) as SubCategoryType;
 }
 
 /**
