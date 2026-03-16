@@ -55,13 +55,14 @@ function createMarkerContent(place: Place, isActive: boolean): string {
   </div>`;
 }
 
-function createClusterContent(count: number, categoryBreakdown: { category: CategoryType; count: number }[], clusterId: string, hasSelectedPlace = false): string {
+function createClusterContent(count: number, categoryBreakdown: { category: CategoryType; count: number }[], clusterId: string, isActive = false): string {
   const total = categoryBreakdown.reduce((s, b) => s + b.count, 0);
   if (total === 0) return '';
   const topCat = categoryBreakdown[0];
   const topColor = getCategoryColor(topCat.category);
-  const size = Math.min(64, Math.max(40, 32 + Math.log10(count + 1) * 12));
-  const fontSize = count >= 1000 ? 11 : count >= 100 ? 12 : 14;
+  const baseSize = Math.min(64, Math.max(40, 32 + Math.log10(count + 1) * 12));
+  const size = isActive ? baseSize + 10 : baseSize;
+  const fontSize = isActive ? (count >= 1000 ? 13 : count >= 100 ? 14 : 16) : (count >= 1000 ? 11 : count >= 100 ? 12 : 14);
   const label = count >= 10000 ? `${(count / 1000).toFixed(0)}k` : count >= 1000 ? `${(count / 1000).toFixed(1)}k` : String(count);
   const barW = Math.max(size, 48);
   const barH = 5;
@@ -72,13 +73,15 @@ function createClusterContent(count: number, categoryBreakdown: { category: Cate
     barSegments += `<rect x="${barX}" y="0" width="${w}" height="${barH}" fill="${getCategoryColor(item.category)}" />`;
     barX += w;
   });
-  const badges = categoryBreakdown.slice(0, 3).map((item) => `<span style="font-size:8px;line-height:1;">${CAT_EMOJI[item.category] ?? ''}</span>`).join('');
+  const badges = categoryBreakdown.slice(0, 3).map((item) => `<span style="font-size:${isActive ? '10px' : '8px'};line-height:1;">${CAT_EMOJI[item.category] ?? ''}</span>`).join('');
   const safeClusterId = clusterId.replace(/'/g, "\\'");
-  return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.2s;" class="cluster-marker" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'" onclick="this.style.transform='scale(1.3)';setTimeout(()=>{this.style.transform='scale(1)'},200);event.stopPropagation();window.__pz_cluster_click&&window.__pz_cluster_click('${safeClusterId}')">
-    <div style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:white;border:3px solid ${topColor};box-shadow:${hasSelectedPlace ? `0 0 0 3px ${topColor}40,` : ''} 0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
-      <span style="font-size:${fontSize}px;font-weight:800;color:#1f2937;line-height:1.1;">${label}</span>
+  const checkBadge = `<div style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:2px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.2);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`;
+  return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.2s;transform:${isActive ? 'scale(1.15)' : 'scale(1)'};" class="cluster-marker" onmouseenter="if(!this.dataset.active)this.style.transform='scale(1.2)'" onmouseleave="if(!this.dataset.active)this.style.transform='scale(1)'" ${isActive ? 'data-active="1"' : ''} onclick="event.stopPropagation();window.__pz_cluster_click&&window.__pz_cluster_click('${safeClusterId}')">
+    ${isActive ? `<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:${size + 20}px;height:${size + 20}px;border-radius:50%;background:${topColor}20;animation:marker-pulse 1.5s ease-in-out infinite;"></div>` : ''}
+    <div style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:white;border:${isActive ? '4px' : '3px'} solid ${topColor};box-shadow:${isActive ? `0 0 0 3px ${topColor}40, 0 4px 12px rgba(0,0,0,0.25)` : '0 2px 8px rgba(0,0,0,0.15)'};display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+      <span style="font-size:${fontSize}px;font-weight:800;color:${isActive ? topColor : '#1f2937'};line-height:1.1;">${label}</span>
       <div style="display:flex;gap:1px;margin-top:1px;">${badges}</div>
-      ${hasSelectedPlace ? `<div style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:2px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.2);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}
+      ${isActive ? checkBadge : ''}
     </div>
     <svg width="${barW}" height="${barH}" style="overflow:hidden;border-radius:${barH / 2}px;pointer-events:none;">${barSegments}</svg>
   </div>`;
@@ -106,6 +109,7 @@ export default function MapContainer() {
 
   const [sdkReady, setSdkReady] = useState(false);
   const [sdkError, setSdkError] = useState<string | null>(null);
+  const [activeClusterId, setActiveClusterId] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [hasMyLocation, setHasMyLocation] = useState(false);
 
@@ -166,6 +170,7 @@ export default function MapContainer() {
     kakao.maps.event.addListener(map, 'idle', idleHandler);
     kakao.maps.event.addListener(map, 'click', () => {
       selectMarker(null);
+      setActiveClusterId(null);
       useUIStore.getState().closeClusterList();
     });
 
@@ -260,9 +265,9 @@ export default function MapContainer() {
         const catCount = new Map<CategoryType, number>();
         clusterPlaces.forEach((p) => catCount.set(p.category, (catCount.get(p.category) || 0) + 1));
         const categoryBreakdown = Array.from(catCount.entries()).map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count);
-        const hasSelected = !!activeMarkerId && clusterPlaces.some((p) => p.id === activeMarkerId);
-        const content = createClusterContent(clusterPlaces.length, categoryBreakdown, clusterId, hasSelected);
-        const overlay = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(avgLat, avgLng), content, clickable: true, xAnchor: 0.5, yAnchor: 0.5, zIndex: 5 });
+        const isClusterActive = activeClusterId === clusterId;
+        const content = createClusterContent(clusterPlaces.length, categoryBreakdown, clusterId, isClusterActive);
+        const overlay = new kakao.maps.CustomOverlay({ position: new kakao.maps.LatLng(avgLat, avgLng), content, clickable: true, xAnchor: 0.5, yAnchor: 0.5, zIndex: isClusterActive ? 30 : 5 });
         overlay.setMap(map);
         overlaysRef.current.push(overlay);
       } else {
@@ -278,17 +283,19 @@ export default function MapContainer() {
       }
       overlayCount++;
     }
-  }, [filteredPlaces, activeMarkerId, activeCategory]);
+  }, [filteredPlaces, activeMarkerId, activeClusterId, activeCategory]);
 
   useEffect(() => { renderMarkers(); }, [renderMarkers]);
 
   useEffect(() => {
     window.__pz_marker_click = (placeId: string) => {
       useUIStore.getState().closeClusterList();
+      setActiveClusterId(null);
       selectMarker(placeId);
     };
     window.__pz_cluster_click = (clusterId: string) => {
       selectMarker(null);
+      setActiveClusterId(clusterId);
       const places = clusterPlacesMap.get(clusterId);
       if (places && places.length > 0) {
         useUIStore.getState().openClusterList(places);
