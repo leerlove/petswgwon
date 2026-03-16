@@ -44,11 +44,11 @@ function removeRecentSearch(term: string) {
 export default function SearchBar() {
   const searchQuery = usePlaceStore((s) => s.searchQuery);
   const setSearchQuery = usePlaceStore((s) => s.setSearchQuery);
+  const setPlaces = usePlaceStore((s) => s.setPlaces);
   const selectMarker = usePlaceStore((s) => s.selectMarker);
   const places = usePlaceStore((s) => s.places);
   const isSearchOpen = useUIStore((s) => s.isSearchOpen);
   const setSearchOpen = useUIStore((s) => s.setSearchOpen);
-  const openDetail = useUIStore((s) => s.openDetail);
   const activeCategory = useFilterStore((s) => s.activeCategory);
   const setCategory = useFilterStore((s) => s.setCategory);
   const filters = useFilterStore((s) => s.filters);
@@ -113,6 +113,7 @@ export default function SearchBar() {
     if (q) {
       const results = searchResults.length > 0 ? searchResults : await searchFromAPI(q);
       if (results.length > 0) {
+        setPlaces(results);
         const avgLat = results.reduce((s: number, p: { lat: number }) => s + p.lat, 0) / results.length;
         const avgLng = results.reduce((s: number, p: { lng: number }) => s + p.lng, 0) / results.length;
         setMapCenter({ lat: avgLat, lng: avgLng });
@@ -120,7 +121,7 @@ export default function SearchBar() {
       }
     }
     setSearchOpen(false);
-  }, [localQuery, setSearchQuery, setSearchOpen, selectMarker, searchResults, searchFromAPI, setMapCenter, setZoomLevel]);
+  }, [localQuery, setSearchQuery, setSearchOpen, selectMarker, searchResults, searchFromAPI, setPlaces, setMapCenter, setZoomLevel]);
 
   const handleClearSearch = useCallback(() => { setLocalQuery(''); setSearchQuery(''); }, [setSearchQuery]);
 
@@ -131,13 +132,14 @@ export default function SearchBar() {
     selectMarker(null);
     const results = await searchFromAPI(term);
     if (results.length > 0) {
+      setPlaces(results);
       const avgLat = results.reduce((s: number, p: { lat: number }) => s + p.lat, 0) / results.length;
       const avgLng = results.reduce((s: number, p: { lng: number }) => s + p.lng, 0) / results.length;
       setMapCenter({ lat: avgLat, lng: avgLng });
       setZoomLevel(results.length <= 3 ? 17 : results.length <= 20 ? 15 : 13);
     }
     setSearchOpen(false);
-  }, [setSearchQuery, setSearchOpen, selectMarker, searchFromAPI, setMapCenter, setZoomLevel]);
+  }, [setSearchQuery, setSearchOpen, selectMarker, searchFromAPI, setPlaces, setMapCenter, setZoomLevel]);
 
   const handleRemoveRecent = useCallback((term: string) => { removeRecentSearch(term); setRecentSearches(getRecentSearches()); }, []);
 
@@ -181,7 +183,7 @@ export default function SearchBar() {
               <p className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-3">검색 결과</p>
               <div className="flex flex-col gap-1">
                 {filteredPlaces.slice(0, 5).map((place) => (
-                  <button key={place.id} onClick={() => { saveRecentSearch(localQuery.trim()); setSearchOpen(false); setMapCenter({ lat: place.lat, lng: place.lng }); setZoomLevel(17); openDetail(place); }} className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-warm-100/60 transition-colors text-left">
+                  <button key={place.id} onClick={() => { saveRecentSearch(localQuery.trim()); setPlaces(searchResults); setSearchOpen(false); setMapCenter({ lat: place.lat, lng: place.lng }); setZoomLevel(17); selectMarker(place.id); }} className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-warm-100/60 transition-colors text-left">
                     <span className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: getCategoryColor(place.category) + '20' }}>{CAT_EMOJI[place.category] ?? '📍'}</span>
                     <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-warm-900 truncate">{place.name}</p><p className="text-xs text-warm-400 truncate">{place.address}</p></div>
                     <svg width="16" height="16" fill="none" stroke="#A3B8B8" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
@@ -219,7 +221,7 @@ export default function SearchBar() {
                 {recentViewedPlaces.slice(0, 5).map((rp) => {
                   const placeData = places.find((p) => p.id === rp.id);
                   return (
-                    <button key={rp.id} onClick={() => { setSearchOpen(false); if (placeData) { setMapCenter({ lat: placeData.lat, lng: placeData.lng }); setZoomLevel(17); selectMarker(placeData.id); openDetail(placeData); } }} className="flex flex-col items-center gap-1.5 shrink-0 w-[72px] press-scale">
+                    <button key={rp.id} onClick={() => { setSearchOpen(false); if (placeData) { setMapCenter({ lat: placeData.lat, lng: placeData.lng }); setZoomLevel(17); selectMarker(placeData.id); } }} className="flex flex-col items-center gap-1.5 shrink-0 w-[72px] press-scale">
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg" style={{ backgroundColor: getCategoryColor(rp.category as CategoryType) + '18' }}>{CAT_EMOJI[rp.category as CategoryType] ?? '📍'}</div>
                       <span className="text-[11px] text-warm-700 font-medium text-center leading-tight line-clamp-2 w-full">{rp.name}</span>
                     </button>
