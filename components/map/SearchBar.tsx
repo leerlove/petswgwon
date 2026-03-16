@@ -181,7 +181,7 @@ export default function SearchBar() {
               <p className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-3">검색 결과</p>
               <div className="flex flex-col gap-1">
                 {filteredPlaces.slice(0, 5).map((place) => (
-                  <button key={place.id} onClick={() => { saveRecentSearch(localQuery.trim()); setSearchOpen(false); setMapCenter({ lat: place.lat, lng: place.lng }); setZoomLevel(17); selectMarker(place.id); }} className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-warm-100/60 transition-colors text-left">
+                  <button key={place.id} onClick={() => { saveRecentSearch(localQuery.trim()); setSearchOpen(false); setMapCenter({ lat: place.lat, lng: place.lng }); setZoomLevel(17); openDetail(place); }} className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-warm-100/60 transition-colors text-left">
                     <span className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: getCategoryColor(place.category) + '20' }}>{CAT_EMOJI[place.category] ?? '📍'}</span>
                     <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-warm-900 truncate">{place.name}</p><p className="text-xs text-warm-400 truncate">{place.address}</p></div>
                     <svg width="16" height="16" fill="none" stroke="#A3B8B8" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
