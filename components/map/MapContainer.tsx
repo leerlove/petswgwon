@@ -107,9 +107,10 @@ export default function MapContainer() {
   const isSyncingRef = useRef(false);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const activeClusterId = useUIStore((s) => s.activeClusterId);
+
   const [sdkReady, setSdkReady] = useState(false);
   const [sdkError, setSdkError] = useState<string | null>(null);
-  const [activeClusterId, setActiveClusterId] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [hasMyLocation, setHasMyLocation] = useState(false);
 
@@ -170,7 +171,6 @@ export default function MapContainer() {
     kakao.maps.event.addListener(map, 'idle', idleHandler);
     kakao.maps.event.addListener(map, 'click', () => {
       selectMarker(null);
-      setActiveClusterId(null);
       useUIStore.getState().closeClusterList();
     });
 
@@ -290,15 +290,13 @@ export default function MapContainer() {
   useEffect(() => {
     window.__pz_marker_click = (placeId: string) => {
       useUIStore.getState().closeClusterList();
-      setActiveClusterId(null);
       selectMarker(placeId);
     };
     window.__pz_cluster_click = (clusterId: string) => {
       selectMarker(null);
-      setActiveClusterId(clusterId);
       const places = clusterPlacesMap.get(clusterId);
       if (places && places.length > 0) {
-        useUIStore.getState().openClusterList(places);
+        useUIStore.getState().openClusterList(places, clusterId);
       }
     };
     return () => { delete window.__pz_marker_click; delete window.__pz_cluster_click; };

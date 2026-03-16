@@ -8,13 +8,14 @@ interface UIState {
   detailScrollPage: number;
   isSearchOpen: boolean;
   clusterPlaces: Place[];
+  activeClusterId: string | null;
 
   setPopupPlace: (place: Place | null) => void;
   openDetail: (place: Place) => void;
   closeDetail: () => void;
   setDetailScrollPage: (page: number) => void;
   setSearchOpen: (open: boolean) => void;
-  openClusterList: (places: Place[]) => void;
+  openClusterList: (places: Place[], clusterId: string) => void;
   closeClusterList: () => void;
 }
 
@@ -25,6 +26,7 @@ export const useUIStore = create<UIState>((set) => ({
   detailScrollPage: 0,
   isSearchOpen: false,
   clusterPlaces: [],
+  activeClusterId: null,
 
   setPopupPlace: (place) => set({ popupPlace: place }),
 
@@ -34,6 +36,7 @@ export const useUIStore = create<UIState>((set) => ({
     detailScrollPage: 0,
     popupPlace: null,
     clusterPlaces: [],
+    activeClusterId: null,
   }),
 
   closeDetail: () => set({
@@ -44,6 +47,6 @@ export const useUIStore = create<UIState>((set) => ({
 
   setDetailScrollPage: (page) => set({ detailScrollPage: page }),
   setSearchOpen: (open) => set({ isSearchOpen: open }),
-  openClusterList: (places) => set({ clusterPlaces: places, popupPlace: null }),
-  closeClusterList: () => set({ clusterPlaces: [] }),
+  openClusterList: (places, clusterId) => set({ clusterPlaces: places, activeClusterId: clusterId, popupPlace: null }),
+  closeClusterList: () => set({ clusterPlaces: [], activeClusterId: null }),
 }));
