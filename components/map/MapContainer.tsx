@@ -74,7 +74,7 @@ function createClusterContent(count: number, categoryBreakdown: { category: Cate
   });
   const badges = categoryBreakdown.slice(0, 3).map((item) => `<span style="font-size:8px;line-height:1;">${CAT_EMOJI[item.category] ?? ''}</span>`).join('');
   const safeClusterId = clusterId.replace(/'/g, "\\'");
-  return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;" class="cluster-marker" onclick="event.stopPropagation();window.__pz_cluster_click&&window.__pz_cluster_click('${safeClusterId}')">
+  return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.2s;" class="cluster-marker" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'" onclick="this.style.transform='scale(1.3)';setTimeout(()=>{this.style.transform='scale(1)'},200);event.stopPropagation();window.__pz_cluster_click&&window.__pz_cluster_click('${safeClusterId}')">
     <div style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:white;border:3px solid ${topColor};box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
       <span style="font-size:${fontSize}px;font-weight:800;color:#1f2937;line-height:1.1;">${label}</span>
       <div style="display:flex;gap:1px;margin-top:1px;">${badges}</div>
