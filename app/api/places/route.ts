@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
 
   if (category) {
     query = query.eq('category', category);
+  } else {
+    // 기타 카테고리는 UI에 표시하지 않으므로 기본 조회에서 제외
+    query = query.neq('category', 'etc');
   }
   if (subCategory) {
     query = query.eq('sub_category', subCategory);

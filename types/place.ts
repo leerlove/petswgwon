@@ -54,13 +54,15 @@ export type CategoryType =
   | 'medical_health'
   | 'accommodation_travel'
   | 'pet_service'
-  | 'play_shopping';
+  | 'play_shopping'
+  | 'etc';
 
 export type SubCategoryType =
   | 'restaurant' | 'bar' | 'cafe'
   | 'vet' | 'pharmacy'
   | 'accommodation' | 'travel' | 'camping'
   | 'funeral' | 'grooming' | 'hotel_care'
-  | 'supplies' | 'playground';
+  | 'supplies' | 'shopping' | 'pet_supplies' | 'playground'
+  | 'pending';
 
 export type GNBTab = 'petzone' | 'playground' | 'hotplace';

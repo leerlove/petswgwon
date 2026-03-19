@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
     let query = supabase.from('places').select('*').limit(100).order('name');
     if (category && category !== 'all') {
       query = query.eq('category', category);
+    } else {
+      query = query.neq('category', 'etc');
     }
     const { data } = await query;
     return NextResponse.json((data ?? []).map(transformPlace));
@@ -24,6 +26,7 @@ export async function GET(request: NextRequest) {
     .from('places')
     .select('*')
     .or(`name.ilike.%${q}%,address.ilike.%${q}%`)
+    .neq('category', 'etc')
     .limit(100)
     .order('name');
 

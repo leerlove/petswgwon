@@ -16,16 +16,24 @@ const SUB_CATEGORY_KO_TO_ID: Record<string, string> = {
   '동물장묘업': 'funeral',
   '미용': 'grooming',
   '호텔링/위탁관리': 'hotel_care',
+  '호텔링및위탁관리': 'hotel_care',
   '용품판매': 'supplies',
+  '쇼핑': 'shopping',
+  '펫용품': 'pet_supplies',
   '운동장': 'playground',
+  '입력대기': 'pending',
 };
 
 const CATEGORY_KO_TO_ID: Record<string, string> = {
   '식음료': 'food_beverage',
   '의료/건강': 'medical_health',
+  '의료및건강': 'medical_health',
   '숙박/여행': 'accommodation_travel',
+  '숙박및여행': 'accommodation_travel',
   '반려동물서비스': 'pet_service',
   '놀이/쇼핑': 'play_shopping',
+  '놀이및쇼핑': 'play_shopping',
+  '기타': 'etc',
 };
 
 function normalizeCategory(value: string): CategoryType {

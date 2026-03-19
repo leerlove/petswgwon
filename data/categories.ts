@@ -46,10 +46,26 @@ export const categories: Category[] = [
     icon: '🛍️',
     subCategories: [
       { id: 'supplies', name: '용품판매' },
+      { id: 'shopping', name: '쇼핑' },
+      { id: 'pet_supplies', name: '펫용품' },
       { id: 'playground', name: '운동장' },
     ],
   },
+  {
+    id: 'etc',
+    name: '기타',
+    icon: '📌',
+    subCategories: [
+      { id: 'pending', name: '입력대기' },
+    ],
+  },
 ];
+
+/** UI에 표시할 카테고리만 (기타 제외) */
+const HIDDEN_CATEGORIES: CategoryType[] = ['etc'];
+export const visibleCategories = categories.filter(
+  (c) => !HIDDEN_CATEGORIES.includes(c.id),
+);
 
 export const categoryColorMap: Record<CategoryType, string> = {
   food_beverage: '#FF6B35',
@@ -57,6 +73,7 @@ export const categoryColorMap: Record<CategoryType, string> = {
   accommodation_travel: '#22C55E',
   pet_service: '#A855F7',
   play_shopping: '#F59E0B',
+  etc: '#6B7280',
 };
 
 export const CAT_EMOJI: Record<CategoryType, string> = {
@@ -65,6 +82,7 @@ export const CAT_EMOJI: Record<CategoryType, string> = {
   accommodation_travel: '🏨',
   pet_service: '🐾',
   play_shopping: '🛍️',
+  etc: '📌',
 };
 
 export function getCategoryInfo(categoryId: CategoryType) {

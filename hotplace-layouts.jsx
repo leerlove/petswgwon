@@ -17,9 +17,9 @@ const SAMPLE_POSTS = [
     weekLabel: "3월 2주차",
     tags: ["봄", "브런치", "벚꽃", "카페"],
     places: [
-      { name: "카페 블룸", category: "카페", distance: "2.3km", tags: ["테라스", "펫메뉴"] },
-      { name: "더가든브런치", category: "음식점", distance: "5.1km", tags: ["브런치", "정원"] },
-      { name: "봄날의카페", category: "카페", distance: "3.8km", tags: ["벚꽃뷰", "대형견가능"] },
+      { name: "KAMCHA", category: "음식점", distance: "2.3km", tags: ["카페", "실내"] },
+      { name: "강릉 중화짬뽕빵", category: "음식점", distance: "5.1km", tags: ["음식점", "실내"] },
+      { name: "가고픈흙집", category: "음식점", distance: "3.8km", tags: ["음식점", "실내"] },
     ],
     readTime: "3분",
     likeCount: 42,
@@ -39,8 +39,8 @@ const SAMPLE_POSTS = [
     weekLabel: "3월 1주차",
     tags: ["대형견", "독파크", "오프리쉬"],
     places: [
-      { name: "멍멍파크 잠실", category: "운동장", distance: "1.2km", tags: ["오프리쉬", "대형견"] },
-      { name: "해피독런 일산", category: "운동장", distance: "12km", tags: ["넓은잔디밭", "주차가능"] },
+      { name: "306퍼피", category: "쇼핑", distance: "1.2km", tags: ["쇼핑", "실내"] },
+      { name: "GEO키즈글램핑", category: "캠핑", distance: "12km", tags: ["캠핑"] },
     ],
     readTime: "4분",
     likeCount: 89,
@@ -60,7 +60,7 @@ const SAMPLE_POSTS = [
     weekLabel: "2월 4주차",
     tags: ["피부", "알러지", "동물병원"],
     places: [
-      { name: "더피부동물병원", category: "동물병원", distance: "4.2km", tags: ["피부과전문", "알러지검사"] },
+      { name: "24시 SNC 동물메디컬센터", category: "동물병원", distance: "4.2km", tags: ["동물병원", "실내"] },
     ],
     readTime: "5분",
     likeCount: 67,

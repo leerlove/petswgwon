@@ -6,14 +6,14 @@ import { useUIStore } from '@/stores/uiStore';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useFilterStore } from '@/stores/filterStore';
 import { useMapStore } from '@/stores/mapStore';
-import { categories, CAT_EMOJI, getCategoryColor } from '@/data/categories';
+import { visibleCategories, CAT_EMOJI, getCategoryColor } from '@/data/categories';
 import type { CategoryType } from '@/types';
 import { getRecentPlaces, clearRecentPlaces, type RecentPlace } from '@/lib/recentPlaces';
 
 const STORAGE_KEY = 'petzone_recent_searches';
 const CATEGORY_CHIPS: { label: string; value: CategoryType | 'all' }[] = [
   { label: '전체', value: 'all' },
-  ...categories.map((c) => ({ label: c.name, value: c.id as CategoryType })),
+  ...visibleCategories.map((c) => ({ label: c.name, value: c.id as CategoryType })),
 ];
 const MAX_RECENT = 5;
 

@@ -3,7 +3,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { usePlaceStore } from '@/stores/placeStore';
 import { useFilterStore } from '@/stores/filterStore';
-import { categories, getCategoryColor, CAT_EMOJI } from '@/data/categories';
+import { visibleCategories, getCategoryColor, CAT_EMOJI } from '@/data/categories';
 import type { CategoryType } from '@/types';
 
 export default function CategoryTabBar() {
@@ -21,16 +21,16 @@ export default function CategoryTabBar() {
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { all: places.length };
-    categories.forEach((c) => { counts[c.id] = places.filter((p) => p.category === c.id).length; });
+    visibleCategories.forEach((c) => { counts[c.id] = places.filter((p) => p.category === c.id).length; });
     return counts;
   }, [places]);
 
   const tabs = [
     { id: 'all' as const, name: '전체', color: '#1f2937', emoji: '🗺️' },
-    ...categories.map((c) => ({ id: c.id, name: c.name, color: getCategoryColor(c.id), emoji: CAT_EMOJI[c.id] ?? '📍' })),
+    ...visibleCategories.map((c) => ({ id: c.id, name: c.name, color: getCategoryColor(c.id), emoji: CAT_EMOJI[c.id] ?? '📍' })),
   ];
 
-  const activeCat = categories.find((c) => c.id === activeCategory);
+  const activeCat = visibleCategories.find((c) => c.id === activeCategory);
   const activeCatColor = activeCategory !== 'all' ? getCategoryColor(activeCategory as CategoryType) : undefined;
 
   const handleCategoryClick = useCallback((id: string) => {

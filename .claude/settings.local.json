@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json; d=json.load\\(open\\(''c:/Users/jaeky/Desktop/petse/scripts/places-data.json''\\)\\); print\\(type\\(d\\), len\\(d\\) if isinstance\\(d, list\\) else list\\(d.keys\\(\\)\\)[:5]\\); print\\(json.dumps\\(d[0] if isinstance\\(d, list\\) else list\\(d.values\\(\\)\\)[0], ensure_ascii=False, indent=2\\)[:2000]\\)\")",
+      "Bash(python -c \"import json; d=json.load\\(open\\(''c:/Users/jaeky/Desktop/petse/scripts/places-data.json'', encoding=''utf-8''\\)\\); t=type\\(d\\); print\\(t, len\\(d\\) if isinstance\\(d, list\\) else list\\(d.keys\\(\\)\\)[:5]\\); first=d[0] if isinstance\\(d, list\\) else list\\(d.values\\(\\)\\)[0]; print\\(json.dumps\\(first, ensure_ascii=False, indent=2\\)[:3000]\\)\")"
+    ]
+  }
+}
