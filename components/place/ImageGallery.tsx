@@ -9,6 +9,7 @@ const GALLERY_PRESETS: Record<CategoryType, { gradients: string[]; icons: string
   accommodation_travel: { gradients: ['from-green-50 to-emerald-50', 'from-emerald-50 to-teal-50', 'from-lime-50 to-green-50', 'from-teal-50 to-cyan-50', 'from-green-100 to-green-50'], icons: ['🏨', '🛏️', '🐕', '🌲', '🏊'], labels: ['숙소 외관', '객실', '반려견 공간', '주변 환경', '부대 시설'] },
   pet_service: { gradients: ['from-purple-50 to-violet-50', 'from-violet-50 to-fuchsia-50', 'from-pink-50 to-purple-50', 'from-fuchsia-50 to-pink-50', 'from-purple-100 to-purple-50'], icons: ['✂️', '🛁', '🐩', '💅', '🎀'], labels: ['매장 전경', '미용 공간', '미용 후', '스파 시설', '대기 공간'] },
   play_shopping: { gradients: ['from-yellow-50 to-amber-50', 'from-amber-50 to-orange-50', 'from-lime-50 to-yellow-50', 'from-yellow-100 to-yellow-50', 'from-orange-50 to-yellow-50'], icons: ['🏃', '🐕', '🌳', '🎾', '🛍️'], labels: ['전체 전경', '놀이 공간', '잔디밭', '운동 시설', '매장 내부'] },
+  etc: { gradients: ['from-gray-50 to-slate-50', 'from-slate-50 to-gray-50', 'from-gray-100 to-gray-50', 'from-zinc-50 to-gray-50', 'from-neutral-50 to-gray-50'], icons: ['📍', '🐾', '🏪', '🌟', '📷'], labels: ['장소 전경', '반려견 공간', '매장 내부', '시설', '기타'] },
 };
 
 function ImageGallery({ place }: { place: Place }) {
