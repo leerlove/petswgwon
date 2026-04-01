@@ -37,8 +37,13 @@ function NearbyPlaces({ currentPlace }: { currentPlace: Place }) {
           const color = getCategoryColor(np.category);
           return (
             <button key={np.id} onClick={() => openDetail(np)} className="shrink-0 w-[130px] bg-surface rounded-2xl border border-warm-50 shadow-card overflow-hidden hover:shadow-card-hover transition-all duration-200 press-scale" aria-label={`${np.name} 상세보기`}>
-              <div className="h-[80px] flex items-center justify-center relative" style={{ backgroundColor: color + '12' }}>
-                <span className="text-3xl">{CAT_EMOJI[np.category] ?? '📍'}</span>
+              <div className="h-[80px] flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: color + '12' }}>
+                {np.thumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={np.thumbnail} alt={np.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">{CAT_EMOJI[np.category] ?? '📍'}</span>
+                )}
                 <span className="absolute bottom-1.5 right-1.5 bg-white/90 backdrop-blur-sm text-[10px] font-bold px-1.5 py-0.5 rounded-full text-warm-500 shadow-sm">
                   {np.distance < 1 ? `${Math.round(np.distance * 1000)}m` : `${np.distance.toFixed(1)}km`}
                 </span>

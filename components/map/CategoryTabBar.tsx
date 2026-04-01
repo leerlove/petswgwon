@@ -8,9 +8,9 @@ import type { CategoryType } from '@/types';
 
 export default function CategoryTabBar() {
   const activeCategory = useFilterStore((s) => s.activeCategory);
-  const activeSubCategory = useFilterStore((s) => s.activeSubCategory);
+  const activeSubCategories = useFilterStore((s) => s.activeSubCategories);
   const setCategory = useFilterStore((s) => s.setCategory);
-  const setSubCategory = useFilterStore((s) => s.setSubCategory);
+  const toggleSubCategory = useFilterStore((s) => s.toggleSubCategory);
   const filters = useFilterStore((s) => s.filters);
   const setFilters = useFilterStore((s) => s.setFilters);
   const resetFilters = useFilterStore((s) => s.resetFilters);
@@ -119,11 +119,11 @@ export default function CategoryTabBar() {
         <div className="mx-3 mb-1 animate-slide-up">
           <div className="bg-surface/95 backdrop-blur-sm rounded-full shadow-popup border border-warm-100 px-1.5 py-1.5 flex gap-1 overflow-x-auto scrollbar-hide">
             {activeCat.subCategories.map((sub) => {
-              const isActive = activeSubCategory === sub.id;
+              const isActive = activeSubCategories.includes(sub.id);
               return (
                 <button
                   key={sub.id}
-                  onClick={() => setSubCategory(isActive ? null : sub.id)}
+                  onClick={() => toggleSubCategory(sub.id)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
                     isActive
                       ? 'text-white shadow-sm'

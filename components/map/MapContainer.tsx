@@ -29,10 +29,10 @@ function getMapBounds(map: kakao.maps.Map): MapBounds {
 }
 
 function triggerLoad(bounds: MapBounds) {
-  const { activeCategory, activeSubCategory, filters } = useFilterStore.getState();
+  const { activeCategory, activeSubCategories, filters } = useFilterStore.getState();
   usePlaceStore.getState().loadPlaces({
     category: activeCategory !== 'all' ? activeCategory : undefined,
-    sub_category: activeSubCategory || undefined,
+    sub_categories: activeSubCategories.length > 0 ? activeSubCategories : undefined,
     bounds,
     petSize: filters.petSize !== 'all' ? filters.petSize : undefined,
     indoor: filters.indoor,

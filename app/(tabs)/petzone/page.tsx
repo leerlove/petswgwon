@@ -18,7 +18,7 @@ export default function PetZonePage() {
   const loadError = usePlaceStore((s) => s.loadError);
   const isLoading = usePlaceStore((s) => s.isLoading);
   const activeCategory = useFilterStore((s) => s.activeCategory);
-  const activeSubCategory = useFilterStore((s) => s.activeSubCategory);
+  const activeSubCategories = useFilterStore((s) => s.activeSubCategories);
   const filters = useFilterStore((s) => s.filters);
 
   // Re-fetch when category, subcategory, or filters change (but only if map bounds are ready)
@@ -27,20 +27,20 @@ export default function PetZonePage() {
     if (!bounds) return; // Map not initialized yet - MapContainer handles first load
     loadPlaces({
       category: activeCategory !== 'all' ? activeCategory : undefined,
-      sub_category: activeSubCategory || undefined,
+      sub_categories: activeSubCategories.length > 0 ? activeSubCategories : undefined,
       bounds,
       petSize: filters.petSize !== 'all' ? filters.petSize : undefined,
       indoor: filters.indoor,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory, activeSubCategory, filters]);
+  }, [activeCategory, activeSubCategories, filters]);
 
   const handleRetry = () => {
     const bounds = useMapStore.getState().bounds;
     if (!bounds) return;
     loadPlaces({
       category: activeCategory !== 'all' ? activeCategory : undefined,
-      sub_category: activeSubCategory || undefined,
+      sub_categories: activeSubCategories.length > 0 ? activeSubCategories : undefined,
       bounds,
       petSize: filters.petSize !== 'all' ? filters.petSize : undefined,
       indoor: filters.indoor,

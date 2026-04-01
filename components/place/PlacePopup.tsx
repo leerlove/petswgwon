@@ -76,7 +76,12 @@ function PlacePopup() {
             )}
           </div>
           <div className="w-16 h-16 rounded-xl shrink-0 flex items-center justify-center text-[26px] relative overflow-hidden" style={{ backgroundColor: catColor + '12' }}>
-            <span>{emoji}</span>
+            {popupPlace.thumbnail ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={popupPlace.thumbnail} alt={popupPlace.name} className="w-full h-full object-cover" />
+            ) : (
+              <span>{emoji}</span>
+            )}
             <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/[0.04]" />
           </div>
         </button>

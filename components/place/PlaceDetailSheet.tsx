@@ -10,11 +10,35 @@ import { useBackButton } from '@/hooks/useBackButton';
 import { sharePlace } from '@/lib/share';
 import { openNavigation } from '@/lib/navigation';
 import ImageGallery from './ImageGallery';
+import MiniMap from './MiniMap';
 import PetConditionCard from './PetConditionCard';
 import BlogReviewSection from './BlogReviewSection';
 import PlaceInfoSection from './PlaceInfoSection';
 import NearbyPlaces from './NearbyPlaces';
 import { DetailSkeleton } from '@/components/ui/Skeleton';
+
+function formatRelativeDate(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return '오늘 업데이트';
+  if (diffDays === 1) return '어제 업데이트';
+  if (diffDays < 7) return `${diffDays}일 전 업데이트`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}주 전 업데이트`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}개월 전 업데이트`;
+  return `${Math.floor(diffDays / 365)}년 전 업데이트`;
+}
+
+function getfreshnessBadge(dateStr: string): { label: string; color: string } {
+  const diffMs = new Date().getTime() - new Date(dateStr).getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 7) return { label: '최신', color: 'bg-green-100 text-green-700' };
+  if (diffDays <= 30) return { label: '보통', color: 'bg-yellow-100 text-yellow-700' };
+  return { label: '오래됨', color: 'bg-warm-100 text-warm-500' };
+}
 
 function PlaceDetailSheet() {
   const detailPlace = useUIStore((s) => s.detailPlace);
@@ -112,6 +136,21 @@ function PlaceDetailSheet() {
           <>
             <ImageGallery place={detailPlace} />
             <div className="px-4 pt-4 pb-3">
+              {detailPlace.updated_at && (() => {
+                const badge = getfreshnessBadge(detailPlace.updated_at);
+                return (
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${badge.color}`}>{badge.label}</span>
+                      <span className="text-xs text-warm-500">{formatRelativeDate(detailPlace.updated_at)}</span>
+                    </div>
+                    <button className="text-[11px] text-primary font-medium hover:text-primary-dark transition-colors min-h-[32px] flex items-center gap-0.5">
+                      <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      정보 수정 요청
+                    </button>
+                  </div>
+                );
+              })()}
               <h1 className="text-xl font-bold text-warm-900 leading-tight line-clamp-2">{detailPlace.name}</h1>
               <div className="flex gap-1.5 mt-3 flex-wrap">
                 {detailPlace.tags.map((tag) => (<span key={tag} className="px-2.5 py-1 rounded-full text-xs font-semibold bg-primary text-white shadow-sm shadow-primary/20">#{tag}</span>))}
@@ -119,8 +158,6 @@ function PlaceDetailSheet() {
             </div>
             <div className="h-2 bg-surface-container" />
             <div className="px-4 py-4"><PetConditionCard place={detailPlace} /></div>
-            <div className="h-2 bg-surface-container" />
-            <div className="px-4 py-4"><BlogReviewSection place={detailPlace} /></div>
             <div className="h-2 bg-surface-container" />
             <div className="px-4 py-4"><PlaceInfoSection place={detailPlace} /></div>
             <div className="px-4 pb-4 flex gap-2.5">
@@ -160,22 +197,31 @@ function PlaceDetailSheet() {
             <div className="h-2 bg-surface-container" />
             <div className="px-4 py-4">
               <h3 className="font-bold text-[15px] text-warm-900 mb-3 flex items-center gap-2"><span className="text-lg">🗺️</span>매장 위치</h3>
-              <a href={`https://map.kakao.com/link/map/${encodeURIComponent(detailPlace.name)},${detailPlace.lat},${detailPlace.lng}`} target="_blank" rel="noopener noreferrer" className="block w-full h-[180px] bg-warm-50 rounded-2xl overflow-hidden relative border border-warm-100 hover:border-warm-200 transition-colors group">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center"><span className="text-4xl drop-shadow-md">📍</span><p className="text-xs font-medium text-warm-600 mt-1.5">{detailPlace.name}</p><p className="text-[10px] text-primary font-semibold mt-1 group-hover:underline">카카오맵에서 보기 →</p></div>
+              <MiniMap
+                lat={detailPlace.lat}
+                lng={detailPlace.lng}
+                name={detailPlace.name}
+                height={180}
+              />
+            </div>
+            <div className="px-4 pb-4">
+              <div className="bg-gradient-to-r from-primary-50 to-warm-50 rounded-2xl p-4 border border-primary/15">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" className="text-primary" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold text-warm-900">잘못된 정보가 있나요?</p>
+                    <p className="text-[11px] text-warm-500 mt-0.5">변경된 정보를 알려주시면 빠르게 반영할게요</p>
+                  </div>
+                  <button className="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark transition-colors press-scale shrink-0 shadow-sm shadow-primary/20">
+                    수정 요청
+                  </button>
                 </div>
-              </a>
+              </div>
             </div>
-            <div className="px-4 pb-3 flex items-center justify-between">
-              <p className="text-[11px] text-warm-400">정보 갱신일 {detailPlace.updated_at}</p>
-              <button className="text-[11px] text-warm-400 underline hover:text-warm-600 transition-colors min-h-[44px] flex items-center">정보 수정 요청</button>
-            </div>
-            {detailPlace.caution && (
-              <><div className="h-2 bg-surface-container" /><div className="px-4 py-4">
-                <h3 className="font-bold text-[15px] text-warm-900 mb-3 flex items-center gap-2"><span className="text-lg">⚠️</span>이용 시 주의사항</h3>
-                <div className="bg-accent-rose/10 rounded-2xl p-4 border border-accent-rose/20"><p className="text-[13px] text-accent-rose leading-relaxed">{detailPlace.caution}</p></div>
-              </div></>
-            )}
+            <div className="h-2 bg-surface-container" />
+            <div className="px-4 py-4"><BlogReviewSection place={detailPlace} /></div>
             <div className="h-2 bg-surface-container" />
             <div className="px-4 py-4 pb-10"><NearbyPlaces currentPlace={detailPlace} /></div>
           </>

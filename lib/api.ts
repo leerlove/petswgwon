@@ -78,6 +78,7 @@ const isObject = (d: unknown): boolean => d !== null && typeof d === 'object' &&
 export interface FetchPlacesParams {
   category?: string;
   sub_category?: string;
+  sub_categories?: string[];
   bounds?: { swLat: number; swLng: number; neLat: number; neLng: number };
   petSize?: string;
   indoor?: boolean | null;
@@ -91,7 +92,11 @@ export interface FetchPlacesResult {
 export async function fetchPlaces(params?: FetchPlacesParams): Promise<FetchPlacesResult> {
   const query = new URLSearchParams();
   if (params?.category) query.set('category', params.category);
-  if (params?.sub_category) query.set('sub_category', params.sub_category);
+  if (params?.sub_categories && params.sub_categories.length > 0) {
+    query.set('sub_category', params.sub_categories.join(','));
+  } else if (params?.sub_category) {
+    query.set('sub_category', params.sub_category);
+  }
   if (params?.bounds) {
     query.set('swLat', String(params.bounds.swLat));
     query.set('swLng', String(params.bounds.swLng));

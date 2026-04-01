@@ -1,4 +1,5 @@
 import type { Place, CategoryType, SubCategoryType } from '@/types';
+import { getSubCategoryName } from '@/data/categories';
 
 /**
  * DB에 한글로 저장된 sub_category / category를 영문 ID로 정규화
@@ -17,7 +18,7 @@ const SUB_CATEGORY_KO_TO_ID: Record<string, string> = {
   '미용': 'grooming',
   '호텔링/위탁관리': 'hotel_care',
   '호텔링및위탁관리': 'hotel_care',
-  '용품판매': 'supplies',
+  '용품판매': 'pet_supplies',
   '쇼핑': 'shopping',
   '펫용품': 'pet_supplies',
   '운동장': 'playground',
@@ -45,6 +46,30 @@ function normalizeSubCategory(value: string): SubCategoryType {
 }
 
 /**
+ * 업종 + 허용공간 기준으로 해시태그 생성
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildTags(row: any): string[] {
+  const tags: string[] = [];
+
+  // 1. 업종 (소 카테고리 한글 이름)
+  const subCatId = normalizeSubCategory(row.sub_category ?? '');
+  const subCatName = getSubCategoryName(subCatId);
+  if (subCatName && subCatName !== subCatId) {
+    tags.push(subCatName);
+  }
+
+  // 2. 허용공간
+  if (row.indoor_allowed) {
+    tags.push('실내 가능');
+  } else {
+    tags.push('실외만');
+  }
+
+  return tags;
+}
+
+/**
  * Supabase DB 행 → 프론트엔드 Place 타입 변환
  *
  * DB에는 flat 컬럼(small_dog, medium_dog, ...)으로 저장되어 있고,
@@ -64,7 +89,7 @@ export function transformPlace(row: any): Place {
     lng: row.lng,
     thumbnail: row.thumbnail ?? '',
     images: row.images ?? [],
-    tags: row.tags ?? [],
+    tags: buildTags(row),
     business_hours: row.business_hours ?? {},
     pet_conditions: {
       small_dog: row.small_dog ?? true,

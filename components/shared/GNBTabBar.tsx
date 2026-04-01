@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUIStore } from '@/stores/uiStore';
 
 const tabs = [
   { id: 'playground', label: '반려동물 놀이터', href: '/playground' },
@@ -11,15 +12,24 @@ const tabs = [
 
 export default function GNBTabBar() {
   const pathname = usePathname();
+  const closeDetail = useUIStore((s) => s.closeDetail);
+  const isDetailOpen = useUIStore((s) => s.isDetailOpen);
+
+  const handleTabClick = () => {
+    if (isDetailOpen) {
+      closeDetail();
+    }
+  };
 
   return (
-    <nav className="flex bg-surface border-b border-warm-100 relative z-30 shrink-0" role="tablist" aria-label="메인 탭">
+    <nav className="flex bg-surface border-b border-warm-100 relative z-50 shrink-0" role="tablist" aria-label="메인 탭">
       {tabs.map((tab) => {
         const isActive = pathname === tab.href;
         return (
           <Link
             key={tab.id}
             href={tab.href}
+            onClick={handleTabClick}
             className={`flex-1 py-3 text-[14px] font-semibold text-center transition-colors relative ${
               isActive ? 'text-warm-900' : 'text-warm-400'
             }`}

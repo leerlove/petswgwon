@@ -14,6 +14,12 @@ export default function PlaceInfoSection({ place }: { place: Place }) {
   const todayHours = place.business_hours[today] || '정보 없음';
   const isOpen = todayHours !== '휴무' && todayHours !== '정보 없음';
 
+  const closedDays = useMemo(() => {
+    return DAY_ORDER
+      .filter((day) => (place.business_hours[day] || '').includes('휴무'))
+      .map((day) => DAY_NAMES[day].replace('요일', ''));
+  }, [place.business_hours]);
+
   return (
     <div>
       <h3 className="font-bold text-[15px] text-warm-900 mb-3 flex items-center gap-2">
@@ -70,6 +76,19 @@ export default function PlaceInfoSection({ place }: { place: Place }) {
               </div>
             )}
           </div>
+        </div>
+        {/* 휴무일 */}
+        <div className="flex items-center gap-3">
+          <span className="text-warm-300 shrink-0">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+          </span>
+          <p className="text-sm text-warm-700">
+            {closedDays.length > 0 ? (
+              <><span className="text-accent-rose font-semibold">매주 {closedDays.join(', ')}</span> 휴무</>
+            ) : (
+              <span className="text-warm-400">연중무휴</span>
+            )}
+          </p>
         </div>
       </div>
     </div>

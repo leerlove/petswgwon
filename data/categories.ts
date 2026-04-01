@@ -45,10 +45,9 @@ export const categories: Category[] = [
     name: '놀이/쇼핑',
     icon: '🛍️',
     subCategories: [
-      { id: 'supplies', name: '용품판매' },
-      { id: 'shopping', name: '쇼핑' },
       { id: 'pet_supplies', name: '펫용품' },
       { id: 'playground', name: '운동장' },
+      { id: 'shopping', name: '쇼핑' },
     ],
   },
   {

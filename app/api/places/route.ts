@@ -31,7 +31,12 @@ export async function GET(request: NextRequest) {
     query = query.neq('category', 'etc');
   }
   if (subCategory) {
-    query = query.eq('sub_category', subCategory);
+    const subs = subCategory.split(',').map((s) => s.trim()).filter(Boolean);
+    if (subs.length === 1) {
+      query = query.eq('sub_category', subs[0]);
+    } else if (subs.length > 1) {
+      query = query.in('sub_category', subs);
+    }
   }
 
   if (swLat && swLng && neLat && neLng) {

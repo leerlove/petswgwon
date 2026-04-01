@@ -13,6 +13,16 @@ declare namespace kakao.maps {
   interface MapOptions {
     center: LatLng;
     level?: number;
+    draggable?: boolean;
+    scrollwheel?: boolean;
+    disableDoubleClick?: boolean;
+    disableDoubleClickZoom?: boolean;
+  }
+
+  class Marker {
+    constructor(options: { position: LatLng; map?: Map });
+    setMap(map: Map | null): void;
+    getPosition(): LatLng;
   }
 
   class LatLng {

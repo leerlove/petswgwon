@@ -8,6 +8,7 @@ import PlaceDetailSheet from '@/components/place/PlaceDetailSheet';
 import { transformPlace } from '@/lib/supabase/transformPlace';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { useBackButton } from '@/hooks/useBackButton';
+import MiniMap from '@/components/place/MiniMap';
 
 type Tab = 'latest' | 'popular' | 'archive';
 
@@ -466,36 +467,47 @@ function PostDetailView({
             </h2>
             <div className="flex flex-col gap-3">
               {post.places.map((place, i) => (
-                <button
-                  key={place.id}
-                  onClick={() => onPlaceClick(place)}
-                  className="flex gap-3.5 p-4 bg-warm-50 rounded-2xl border border-warm-100 text-left hover:bg-warm-100/60 transition-colors"
-                >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-lg shrink-0 font-extrabold"
-                    style={{ backgroundColor: post.accent_color + '15', color: post.accent_color }}
+                <div key={place.id} className="bg-warm-50 rounded-2xl border border-warm-100 overflow-hidden">
+                  <button
+                    onClick={() => onPlaceClick(place)}
+                    className="flex gap-3.5 p-4 w-full text-left hover:bg-warm-100/60 transition-colors"
                   >
-                    {i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-sm text-warm-900">{place.name}</h3>
-                    <p className="text-xs text-warm-500 mt-0.5 truncate">{place.address}</p>
-                    <div className="flex gap-1 mt-2">
-                      {(place.tags as string[]).slice(0, 3).map((t) => (
-                        <span
-                          key={t}
-                          className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                          style={{ backgroundColor: post.accent_color + '10', color: post.accent_color }}
-                        >
-                          #{t}
-                        </span>
-                      ))}
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-lg shrink-0 font-extrabold"
+                      style={{ backgroundColor: post.accent_color + '15', color: post.accent_color }}
+                    >
+                      {i + 1}
                     </div>
-                  </div>
-                  <svg width="16" height="16" fill="none" stroke="#D1D5DB" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0 mt-3">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-sm text-warm-900">{place.name}</h3>
+                      <p className="text-xs text-warm-500 mt-0.5 truncate">{place.address}</p>
+                      <div className="flex gap-1 mt-2">
+                        {(place.tags as string[]).slice(0, 3).map((t) => (
+                          <span
+                            key={t}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                            style={{ backgroundColor: post.accent_color + '10', color: post.accent_color }}
+                          >
+                            #{t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <svg width="16" height="16" fill="none" stroke="#D1D5DB" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0 mt-3">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                  {place.lat && place.lng && (
+                    <div className="px-4 pb-4">
+                      <MiniMap
+                        lat={place.lat}
+                        lng={place.lng}
+                        name={place.name}
+                        height={120}
+                      />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
