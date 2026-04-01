@@ -6,7 +6,8 @@ import { useFilterStore } from '@/stores/filterStore';
 import { useMapStore } from '@/stores/mapStore';
 import { useUIStore } from '@/stores/uiStore';
 import type { MapBounds } from '@/stores/mapStore';
-import { getCategoryColor, CAT_EMOJI } from '@/data/categories';
+import { getCategoryColor, CAT_SVG } from '@/data/categories';
+import { CategoryIcon } from '@/components/ui/CategoryIcons';
 import { escapeHtml } from '@/lib/escapeHtml';
 import { loadKakaoMapSDK } from '@/lib/kakaoMap';
 import type { Place, CategoryType } from '@/types';
@@ -41,15 +42,16 @@ function triggerLoad(bounds: MapBounds) {
 
 function createMarkerContent(place: Place, isActive: boolean): string {
   const color = getCategoryColor(place.category);
-  const emoji = CAT_EMOJI[place.category] ?? '📍';
+  const icon = CAT_SVG[place.category] ?? CAT_SVG['etc'];
+  const iconSize = isActive ? 22 : 16;
+  const sizedIcon = icon.replace(/width="\d+"/, `width="${iconSize}"`).replace(/height="\d+"/, `height="${iconSize}"`);
   const safeName = escapeHtml(place.name);
   const safeId = escapeHtml(place.id);
   const size = isActive ? 48 : 38;
-  const fontSize = isActive ? '20px' : '14px';
   return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:transform 0.2s;transform:${isActive ? 'scale(1.2)' : 'scale(1)'};" class="marker-pin" data-place-id="${safeId}" onclick="event.stopPropagation();window.__pz_marker_click&&window.__pz_marker_click('${safeId}')">
     ${isActive ? `<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:${color}25;animation:marker-pulse 1.5s ease-in-out infinite;"></div>` : ''}
     ${isActive ? `<div style="position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);padding:5px 12px;background:${color};color:white;font-size:12px;font-weight:700;border-radius:10px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:40;">${safeName}<svg width="10" height="6" viewBox="0 0 10 6" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);"><polygon points="0,0 5,6 10,0" fill="${color}" /></svg></div>` : ''}
-    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:16px;background:${color};border:${isActive ? '3px solid white' : '2px solid white'};box-shadow:${isActive ? `0 0 0 3px ${color}, 0 4px 12px rgba(0,0,0,0.3)` : '0 2px 8px rgba(0,0,0,0.2)'};"><span style="font-size:${fontSize}">${emoji}</span>${isActive ? `<div style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:2px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.2);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}</div>
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:16px;background:${color};border:${isActive ? '3px solid white' : '2px solid white'};box-shadow:${isActive ? `0 0 0 3px ${color}, 0 4px 12px rgba(0,0,0,0.3)` : '0 2px 8px rgba(0,0,0,0.2)'};">${sizedIcon}${isActive ? `<div style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:2px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.2);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}</div>
     <svg width="12" height="8" viewBox="0 0 12 8" style="margin-top:-1px"><polygon points="0,0 6,8 12,0" fill="${color}" /></svg>
     ${!isActive ? `<div style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);padding:4px 10px;background:rgba(17,24,39,0.9);color:white;font-size:11px;font-weight:500;border-radius:8px;white-space:nowrap;opacity:0;transition:opacity 0.2s;pointer-events:none;" class="marker-tooltip">${safeName}</div>` : ''}
   </div>`;
@@ -73,12 +75,17 @@ function createClusterContent(count: number, categoryBreakdown: { category: Cate
     barSegments += `<rect x="${barX}" y="0" width="${w}" height="${barH}" fill="${getCategoryColor(item.category)}" />`;
     barX += w;
   });
-  const badges = categoryBreakdown.slice(0, 3).map((item) => `<span style="font-size:${isActive ? '10px' : '8px'};line-height:1;">${CAT_EMOJI[item.category] ?? ''}</span>`).join('');
+  const badges = categoryBreakdown.slice(0, 3).map((item) => {
+    const svg = CAT_SVG[item.category] ?? '';
+    const bSize = isActive ? 12 : 10;
+    const col = getCategoryColor(item.category);
+    return svg ? svg.replace(/width="\d+"/, `width="${bSize}"`).replace(/height="\d+"/, `height="${bSize}"`).replace(/stroke="white"/g, `stroke="${col}"`) : '';
+  }).join('');
   const safeClusterId = clusterId.replace(/'/g, "\\'");
   const checkBadge = `<div style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#22c55e;border:2px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.2);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`;
   return `<div style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.2s;transform:${isActive ? 'scale(1.15)' : 'scale(1)'};" class="cluster-marker" onmouseenter="if(!this.dataset.active)this.style.transform='scale(1.2)'" onmouseleave="if(!this.dataset.active)this.style.transform='scale(1)'" ${isActive ? 'data-active="1"' : ''} onclick="event.stopPropagation();window.__pz_cluster_click&&window.__pz_cluster_click('${safeClusterId}')">
     ${isActive ? `<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:${size + 20}px;height:${size + 20}px;border-radius:50%;background:${topColor}20;animation:marker-pulse 1.5s ease-in-out infinite;"></div>` : ''}
-    <div style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:white;border:${isActive ? '4px' : '3px'} solid ${topColor};box-shadow:${isActive ? `0 0 0 3px ${topColor}40, 0 4px 12px rgba(0,0,0,0.25)` : '0 2px 8px rgba(0,0,0,0.15)'};display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+    <div style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:white;border:${isActive ? '4px' : '3px'} solid ${topColor};box-shadow:${isActive ? `0 0 0 3px ${topColor}40, 0 4px 12px rgba(0,0,0,0.25)` : '0 2px 8px rgba(0,0,0,0.15)'};display:flex;flex-direction:column;align-items:center;justify-content:center;">
       <span style="font-size:${fontSize}px;font-weight:800;color:${isActive ? topColor : '#1f2937'};line-height:1.1;">${label}</span>
       <div style="display:flex;gap:1px;margin-top:1px;">${badges}</div>
       ${isActive ? checkBadge : ''}
@@ -329,7 +336,7 @@ export default function MapContainer() {
           return (
             <button key={place.id} onClick={() => selectMarker(place.id)} className="absolute transition-transform duration-200" style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -100%) ${isActive ? 'scale(1.2)' : 'scale(1)'}`, zIndex: isActive ? 30 : 10 }}>
               <div className="flex items-center justify-center rounded-2xl border-2 border-white shadow-lg" style={{ background: color, width: isActive ? 44 : 36, height: isActive ? 44 : 36 }}>
-                <span style={{ fontSize: isActive ? 18 : 14 }}>{CAT_EMOJI[place.category] ?? '📍'}</span>
+                <CategoryIcon categoryId={place.category} size={isActive ? 20 : 16} color="white" />
               </div>
             </button>
           );

@@ -6,7 +6,8 @@ import { useUIStore } from '@/stores/uiStore';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useFilterStore } from '@/stores/filterStore';
 import { useMapStore } from '@/stores/mapStore';
-import { visibleCategories, CAT_EMOJI, getCategoryColor } from '@/data/categories';
+import { visibleCategories, getCategoryColor } from '@/data/categories';
+import { CategoryIcon } from '@/components/ui/CategoryIcons';
 import type { CategoryType } from '@/types';
 import { getRecentPlaces, clearRecentPlaces, type RecentPlace } from '@/lib/recentPlaces';
 
@@ -187,8 +188,8 @@ export default function SearchBar() {
                   const isSelected = activeMarkerId === place.id;
                   return (
                     <button key={place.id} onClick={() => { saveRecentSearch(localQuery.trim()); setPlaces(searchResults); setSearchOpen(false); setMapCenter({ lat: place.lat, lng: place.lng }); setZoomLevel(17); selectMarker(place.id); }} className={`flex items-center gap-3 py-3 px-3 rounded-xl transition-colors text-left ${isSelected ? 'bg-primary/8 ring-1 ring-primary/30' : 'hover:bg-warm-100/60'}`}>
-                      <span className="relative w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: getCategoryColor(place.category) + '20' }}>
-                        {CAT_EMOJI[place.category] ?? '📍'}
+                      <span className="relative w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: getCategoryColor(place.category) + '20' }}>
+                        <CategoryIcon categoryId={place.category} size={18} color={getCategoryColor(place.category)} />
                         {isSelected && <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border border-white"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>}
                       </span>
                       <div className="flex-1 min-w-0"><p className={`text-sm font-semibold truncate ${isSelected ? 'text-primary' : 'text-warm-900'}`}>{place.name}</p><p className="text-xs text-warm-400 truncate">{place.address}</p></div>
@@ -229,7 +230,9 @@ export default function SearchBar() {
                   const placeData = places.find((p) => p.id === rp.id);
                   return (
                     <button key={rp.id} onClick={() => { setSearchOpen(false); if (placeData) { setMapCenter({ lat: placeData.lat, lng: placeData.lng }); setZoomLevel(17); selectMarker(placeData.id); } }} className="flex flex-col items-center gap-1.5 shrink-0 w-[72px] press-scale">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg" style={{ backgroundColor: getCategoryColor(rp.category as CategoryType) + '18' }}>{CAT_EMOJI[rp.category as CategoryType] ?? '📍'}</div>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: getCategoryColor(rp.category as CategoryType) + '18' }}>
+                        <CategoryIcon categoryId={rp.category} size={22} color={getCategoryColor(rp.category as CategoryType)} />
+                      </div>
                       <span className="text-[11px] text-warm-700 font-medium text-center leading-tight line-clamp-2 w-full">{rp.name}</span>
                     </button>
                   );
@@ -254,7 +257,7 @@ export default function SearchBar() {
               const isActive = activeCategory === chip.value;
               return (
                 <button key={chip.value} onClick={() => setCategory(chip.value)} className={`px-4 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap border shrink-0 transition-colors press-scale ${isActive ? 'bg-primary text-white border-primary' : 'border-warm-200 text-warm-600 bg-surface hover:bg-warm-100'}`}>
-                  {chip.value !== 'all' && <span className="mr-1">{CAT_EMOJI[chip.value as CategoryType]}</span>}{chip.label}
+                  {chip.value !== 'all' && <span className="mr-1 inline-flex align-middle"><CategoryIcon categoryId={chip.value} size={14} color={isActive ? 'white' : getCategoryColor(chip.value as CategoryType)} /></span>}{chip.label}
                 </button>
               );
             })}

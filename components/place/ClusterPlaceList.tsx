@@ -3,7 +3,8 @@
 import { memo, useCallback } from 'react';
 import { useUIStore } from '@/stores/uiStore';
 import { usePlaceStore } from '@/stores/placeStore';
-import { getCategoryColor, CAT_EMOJI, getSubCategoryName } from '@/data/categories';
+import { getCategoryColor, getSubCategoryName } from '@/data/categories';
+import { CategoryIcon } from '@/components/ui/CategoryIcons';
 import type { Place } from '@/types';
 
 function ClusterPlaceList() {
@@ -21,7 +22,7 @@ function ClusterPlaceList() {
   if (clusterPlaces.length === 0) return null;
 
   return (
-    <div className="absolute bottom-[60px] left-0 right-0 z-30 px-3 animate-slide-up">
+    <div className="absolute bottom-[60px] left-0 right-0 z-40 px-3 animate-slide-up">
       <div className="w-full bg-white rounded-2xl shadow-popup overflow-hidden border border-warm-50 max-h-[360px] flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-warm-50 shrink-0">
           <p className="text-sm font-bold text-warm-900">{clusterPlaces.length}개의 장소</p>
@@ -32,7 +33,6 @@ function ClusterPlaceList() {
         <div className="overflow-y-auto flex-1">
           {clusterPlaces.map((place) => {
             const catColor = getCategoryColor(place.category);
-            const emoji = CAT_EMOJI[place.category] ?? '📍';
             const subName = getSubCategoryName(place.sub_category);
             const cond = place.pet_conditions;
             const sizeTag = cond.large_dog ? '대형견' : cond.medium_dog ? '중형견' : cond.small_dog ? '소형견' : '';
@@ -43,8 +43,8 @@ function ClusterPlaceList() {
                 onClick={() => handleSelect(place)}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-warm-50 active:bg-warm-100 transition-colors border-b border-warm-50 last:border-b-0"
               >
-                <div className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center text-lg" style={{ backgroundColor: catColor + '14' }}>
-                  {emoji}
+                <div className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center" style={{ backgroundColor: catColor + '14' }}>
+                  <CategoryIcon categoryId={place.category} size={20} color={catColor} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10.5px] font-bold tracking-tight" style={{ color: catColor }}>{subName}</p>

@@ -3,8 +3,9 @@
 import { useMemo, useState, useCallback } from 'react';
 import { usePlaceStore } from '@/stores/placeStore';
 import { useFilterStore } from '@/stores/filterStore';
-import { visibleCategories, getCategoryColor, CAT_EMOJI } from '@/data/categories';
+import { visibleCategories, getCategoryColor } from '@/data/categories';
 import type { CategoryType } from '@/types';
+import { CategoryIcon, IconFilter } from '@/components/ui/CategoryIcons';
 
 export default function CategoryTabBar() {
   const activeCategory = useFilterStore((s) => s.activeCategory);
@@ -26,8 +27,8 @@ export default function CategoryTabBar() {
   }, [places]);
 
   const tabs = [
-    { id: 'all' as const, name: '전체', color: '#1f2937', emoji: '🗺️' },
-    ...visibleCategories.map((c) => ({ id: c.id, name: c.name, color: getCategoryColor(c.id), emoji: CAT_EMOJI[c.id] ?? '📍' })),
+    { id: 'all' as const, name: '전체', color: '#1f2937' },
+    ...visibleCategories.map((c) => ({ id: c.id, name: c.name, color: getCategoryColor(c.id) })),
   ];
 
   const activeCat = visibleCategories.find((c) => c.id === activeCategory);
@@ -154,7 +155,7 @@ export default function CategoryTabBar() {
                 aria-pressed={isActive}
               >
                 <div
-                  className={`w-9 h-9 rounded-full flex items-center justify-center text-lg transition-all duration-200 ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
                     isActive ? 'scale-110 shadow-sm' : ''
                   }`}
                   style={
@@ -163,7 +164,11 @@ export default function CategoryTabBar() {
                       : { backgroundColor: tab.color + '12' }
                   }
                 >
-                  <span className={isActive ? 'brightness-0 invert' : ''}>{tab.emoji}</span>
+                  <CategoryIcon
+                    categoryId={tab.id}
+                    size={18}
+                    color={isActive ? '#ffffff' : tab.color}
+                  />
                 </div>
                 <span
                   className={`text-[10px] font-semibold leading-tight ${
@@ -197,16 +202,10 @@ export default function CategoryTabBar() {
                   : 'bg-warm-100'
               }`}
             >
-              <svg
-                width="16"
-                height="16"
-                fill="none"
-                stroke={showFilters || hasActiveFilters ? 'white' : '#9CA3AF'}
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-              </svg>
+              <IconFilter
+                size={18}
+                color={showFilters || hasActiveFilters ? '#ffffff' : '#9CA3AF'}
+              />
             </div>
             <span
               className={`text-[10px] font-semibold leading-tight ${

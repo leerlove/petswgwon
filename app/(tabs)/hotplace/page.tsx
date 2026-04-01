@@ -26,6 +26,16 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function getEngagementLabel(likeCount: number, createdAt: string): string {
+  const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
+  if (likeCount >= 50) return '🔥 실시간 인기';
+  if (likeCount >= 20) return '🔥 오늘 가장 많이 본 글';
+  if (days === 0) return '✨ 핫한 소식';
+  if (days <= 1) return '👀 방금 다녀감';
+  if (days <= 3) return `🕐 ${days}일 전 읽음`;
+  return '';
+}
+
 export default function HotPlacePage() {
   const openDetail = useUIStore((s) => s.openDetail);
   const posts = useMagazineStore((s) => s.posts);
@@ -201,10 +211,18 @@ export default function HotPlacePage() {
             {activeTab === 'latest' && featured && (
               <div className="p-4 pb-0">
                 <button
-                  className={`w-full text-left bg-gradient-to-br ${featured.gradient} rounded-2xl overflow-hidden relative`}
+                  className={`w-full text-left rounded-2xl overflow-hidden relative ${featured.cover_image ? '' : `bg-gradient-to-br ${featured.gradient}`}`}
                   onClick={() => setViewingPost(featured)}
                 >
-                  <span className="absolute -right-4 -bottom-4 text-8xl opacity-20">{featured.emoji}</span>
+                  {featured.cover_image ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={featured.cover_image} alt={featured.title} className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+                    </>
+                  ) : (
+                    <span className="absolute -right-4 -bottom-4 text-8xl opacity-20">{featured.emoji}</span>
+                  )}
                   <div className="p-5 relative z-10">
                     <span className="bg-white/90 px-2 py-0.5 rounded text-[10px] font-bold text-pink-600 mb-2 inline-block">
                       이번 주 추천
@@ -215,9 +233,13 @@ export default function HotPlacePage() {
                     <div className="flex items-center gap-2 mt-3">
                       <span className="text-white/60 text-[10px]">{formatDate(featured.created_at)}</span>
                       <span className="text-white/40">·</span>
-                      <span className="text-white/60 text-[10px]">{featured.read_time} 읽기</span>
-                      <span className="text-white/40">·</span>
                       <span className="text-white/60 text-[10px]">❤️ {featured.like_count}</span>
+                      {getEngagementLabel(featured.like_count, featured.created_at) && (
+                        <>
+                          <span className="text-white/40">·</span>
+                          <span className="text-white/90 text-[10px] font-semibold">{getEngagementLabel(featured.like_count, featured.created_at)}</span>
+                        </>
+                      )}
                       {featured.places.length > 0 && (
                         <>
                           <span className="text-white/40">·</span>
@@ -358,18 +380,28 @@ function PostDetailView({
       {/* 커버 — 스크롤 시 축소 */}
       <div className="relative shrink-0">
         <div
-          className={`relative w-full bg-gradient-to-br ${post.gradient} overflow-hidden transition-all duration-300 ease-out ${
+          className={`relative w-full overflow-hidden transition-all duration-300 ease-out ${
             scrolled ? 'h-14' : 'aspect-[16/10]'
-          }`}
+          } ${post.cover_image ? '' : `bg-gradient-to-br ${post.gradient}`}`}
         >
-          <span
-            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30 transition-all duration-300 ${
-              scrolled ? 'text-2xl' : 'text-7xl'
-            }`}
-          >
-            {post.emoji}
-          </span>
-          <div className={`absolute inset-0 transition-opacity duration-300 ${scrolled ? 'bg-black/30' : 'bg-gradient-to-t from-black/60 via-transparent to-transparent'}`} />
+          {post.cover_image ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={post.cover_image} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+              <div className={`absolute inset-0 transition-opacity duration-300 ${scrolled ? 'bg-black/40' : 'bg-gradient-to-t from-black/70 via-black/20 to-black/10'}`} />
+            </>
+          ) : (
+            <>
+              <span
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30 transition-all duration-300 ${
+                  scrolled ? 'text-2xl' : 'text-7xl'
+                }`}
+              >
+                {post.emoji}
+              </span>
+              <div className={`absolute inset-0 transition-opacity duration-300 ${scrolled ? 'bg-black/30' : 'bg-gradient-to-t from-black/60 via-transparent to-transparent'}`} />
+            </>
+          )}
         </div>
         {/* 뒤로가기 버튼 — 커버 위에 겹쳐 배치 (overflow 영향 없음) */}
         <button
@@ -421,6 +453,11 @@ function PostDetailView({
               })}
               {' · '}
               {post.read_time} 읽기
+              {getEngagementLabel(post.like_count, post.created_at) && (
+                <span className="ml-1 text-warm-600 font-semibold">
+                  {' · '}{getEngagementLabel(post.like_count, post.created_at)}
+                </span>
+              )}
             </p>
           </div>
           <button onClick={onToggleLike} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-warm-50 border border-warm-200">
@@ -446,9 +483,15 @@ function PostDetailView({
           ))}
         </div>
 
-        {/* 요약 */}
+        {/* AI펫닥터 3줄 요약 */}
         <div className="px-5 py-4 border-b border-warm-100">
-          <p className="text-[15px] text-warm-700 leading-relaxed font-medium">{post.summary}</p>
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100">
+            <div className="flex items-center gap-1.5 mb-2.5">
+              <span className="text-base">🤖</span>
+              <span className="text-xs font-bold text-blue-700">AI펫닥터 3줄 요약</span>
+            </div>
+            <p className="text-[14px] text-warm-700 leading-relaxed font-medium">{post.summary}</p>
+          </div>
         </div>
 
         {/* 본문 내용 */}
@@ -601,8 +644,13 @@ function CompactCard({
     <article className="bg-surface rounded-2xl border border-warm-100 overflow-hidden">
       <button className="w-full flex items-stretch text-left" onClick={onOpenPost}>
         {/* 왼쪽 썸네일 */}
-        <div className={`w-24 shrink-0 bg-gradient-to-br ${post.gradient} flex items-center justify-center`}>
-          <span className="text-3xl">{post.emoji}</span>
+        <div className={`w-24 shrink-0 relative overflow-hidden ${post.cover_image ? '' : `bg-gradient-to-br ${post.gradient}`} flex items-center justify-center`}>
+          {post.cover_image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={post.cover_image} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <span className="text-3xl">{post.emoji}</span>
+          )}
         </div>
 
         {/* 오른쪽 정보 */}
