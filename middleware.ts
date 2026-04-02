@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareClient } from '@/lib/supabase/middleware';
 
+const SUBDOMAIN_ROUTES: Record<string, string> = {
+  petzone: '/petzone',
+  hotplace: '/hotplace',
+  playground: '/playground',
+};
+
 export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get('host') || '';
+  const subdomain = hostname.split('.')[0];
+
+  // 서브도메인 라우팅: petzone/hotplace/playground.aipetdoctor.co.kr
+  if (subdomain in SUBDOMAIN_ROUTES && request.nextUrl.pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = SUBDOMAIN_ROUTES[subdomain];
+    return NextResponse.rewrite(url);
+  }
+
   const { supabase, response } = createMiddlewareClient(request);
 
   // getUser()로 JWT를 서버에서 재검증
@@ -36,5 +52,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/', '/admin/:path*'],
 };
