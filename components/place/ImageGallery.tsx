@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import Image from 'next/image';
 import type { Place, CategoryType } from '@/types';
 
-const SUPABASE_STORAGE_URL = 'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image';
+
 
 const GALLERY_PRESETS: Record<CategoryType, { gradients: string[]; icons: string[]; labels: string[] }> = {
   food_beverage: { gradients: ['from-orange-100 to-amber-50', 'from-amber-50 to-yellow-50', 'from-rose-50 to-orange-50', 'from-orange-50 to-red-50', 'from-yellow-50 to-orange-50'], icons: ['☕', '🍰', '🐕', '🪑', '🌿'], labels: ['대표 메뉴', '디저트', '반려견 공간', '내부 인테리어', '야외 테라스'] },
@@ -48,7 +48,7 @@ function ImageGallery({ place }: { place: Place }) {
 
   const getImageUrl = (url: string) => {
     if (url.startsWith('http')) return url;
-    return `${SUPABASE_STORAGE_URL}/${url}`;
+    return `/api/image/${url}`;
   };
 
   return (
