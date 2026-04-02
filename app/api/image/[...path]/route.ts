@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const SUPABASE_STORAGE_URL =
-  'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image';
+const SUPABASE_URL = 'https://yngzeshxngfeyiabxeyi.supabase.co';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
 
 export async function GET(
   request: NextRequest,
@@ -10,9 +10,15 @@ export async function GET(
   const { path } = await params;
   const imagePath = path.join('/');
 
-  const res = await fetch(`${SUPABASE_STORAGE_URL}/${imagePath}`, {
-    headers: { Accept: 'image/*' },
-  });
+  const res = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/authenticated/place-image/${imagePath}`,
+    {
+      headers: {
+        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+        Accept: 'image/*',
+      },
+    }
+  );
 
   if (!res.ok) {
     return new NextResponse(null, { status: 404 });
