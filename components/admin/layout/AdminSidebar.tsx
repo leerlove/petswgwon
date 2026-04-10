@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const MENU_ITEMS = [
   { href: '/admin', label: '대시보드', icon: '📊' },
   { href: '/admin/places', label: '장소 관리', icon: '📍' },
+  { href: '/admin/playgrounds', label: '놀이터 관리', icon: '🏕️' },
   { href: '/admin/magazine', label: '매거진 관리', icon: '📖' },
   { href: '/admin/reviews', label: '리뷰 관리', icon: '💬' },
   { href: '/admin/quality', label: '데이터 품질', icon: '🔍' },

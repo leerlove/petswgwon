@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { categories } from '@/data/categories';
+import ImageManager from '@/components/admin/ImageManager';
 
 interface PlaceData {
   id?: string;
@@ -221,6 +222,23 @@ export default function PlaceForm({ initialData, isNew = false }: PlaceFormProps
             onChange={(e) => updateField('caution', e.target.value)} />
         </div>
       </section>
+
+      {/* 이미지 */}
+      {form.id && (
+        <ImageManager
+          entityId={form.id}
+          thumbnail={form.thumbnail}
+          images={form.images}
+          onThumbnailChange={(v) => updateField('thumbnail', v)}
+          onImagesChange={(v) => updateField('images', v)}
+        />
+      )}
+      {!form.id && (
+        <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
+          <h2 className="text-sm font-semibold text-gray-900 mb-2">이미지 관리</h2>
+          <p className="text-xs text-gray-400">먼저 등록 후 이미지를 업로드할 수 있습니다.</p>
+        </section>
+      )}
 
       {/* 태그 */}
       <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 space-y-4">
