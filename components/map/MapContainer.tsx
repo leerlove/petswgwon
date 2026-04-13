@@ -108,6 +108,14 @@ export default function MapContainer() {
   const searchQuery = usePlaceStore((s) => s.searchQuery);
   const filters = useFilterStore((s) => s.filters);
 
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && places.length > 0) {
+      setHasLoadedOnce(true);
+    }
+  }, [isLoading, places.length]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<kakao.maps.Map | null>(null);
   const overlaysRef = useRef<kakao.maps.CustomOverlay[]>([]);
@@ -342,7 +350,7 @@ export default function MapContainer() {
           );
         })}
         <div className="absolute top-3 left-3 z-20 bg-surface/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm border border-warm-100"><p className="text-[11px] text-warm-400 font-medium">가상 지도 모드</p></div>
-        {!isLoading && filteredPlaces.length === 0 && (
+        {!isLoading && hasLoadedOnce && filteredPlaces.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"><div className="bg-surface/80 backdrop-blur-sm rounded-2xl px-8 py-5 text-center shadow-lg border border-warm-100"><span className="text-4xl block mb-2">🔍</span><p className="text-sm font-medium text-warm-600">이 지역에 등록된 장소가 없습니다</p></div></div>
         )}
       </div>
@@ -361,7 +369,7 @@ export default function MapContainer() {
         {isLocating ? (<div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />) : (<svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="#3B82F6" /><circle cx="12" cy="12" r="7" stroke="#3B82F6" strokeWidth="2" fill="none" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#3B82F6" strokeWidth="2" /></svg>)}
       </button>
       {sdkReady && isLoading && (<div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-none"><div className="bg-surface/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-float flex items-center gap-2 border border-warm-100"><div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-xs font-medium text-warm-400">장소 불러오는 중...</span></div></div>)}
-      {sdkReady && !isLoading && filteredPlaces.length === 0 && (<div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"><div className="glass rounded-2xl px-8 py-5 text-center shadow-float animate-scale-in border border-warm-100"><span className="text-4xl block mb-2">🔍</span><p className="text-sm font-medium text-warm-600">이 지역에 등록된 장소가 없습니다</p></div></div>)}
+      {sdkReady && !isLoading && hasLoadedOnce && filteredPlaces.length === 0 && (<div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"><div className="glass rounded-2xl px-8 py-5 text-center shadow-float animate-scale-in border border-warm-100"><span className="text-4xl block mb-2">🔍</span><p className="text-sm font-medium text-warm-600">이 지역에 등록된 장소가 없습니다</p></div></div>)}
       {sdkReady && !isLoading && totalCount > 1000 && (<div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-none"><div className="bg-surface/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-float border border-warm-100"><span className="text-xs font-medium text-warm-400">결과가 많습니다. 지도를 확대해주세요</span></div></div>)}
     </div>
   );
