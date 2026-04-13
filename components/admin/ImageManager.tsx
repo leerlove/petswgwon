@@ -61,7 +61,9 @@ export default function ImageManager({ entityId, thumbnail, images, onThumbnailC
     const newPaths: string[] = [];
 
     for (const file of Array.from(selectedFiles)) {
-      if (!file.type.startsWith('image/')) continue;
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      const allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'heic', 'heif'];
+      if (!file.type.startsWith('image/') && !allowedExts.includes(ext)) continue;
       if (file.size > 20 * 1024 * 1024) {
         setError('파일 크기는 20MB 이하만 가능합니다.');
         continue;
@@ -123,7 +125,15 @@ export default function ImageManager({ entityId, thumbnail, images, onThumbnailC
     onThumbnailChange(path);
   };
 
-  const getPreviewUrl = (path: string) => `/api/image/${path}`;
+  const SUPABASE_STORAGE_PREFIX = 'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image/';
+
+  const getPreviewUrl = (path: string) => {
+    if (path.startsWith(SUPABASE_STORAGE_PREFIX)) {
+      return `/api/image/${path.slice(SUPABASE_STORAGE_PREFIX.length)}`;
+    }
+    if (path.startsWith('http')) return path;
+    return `/api/image/${path}`;
+  };
 
   const allPaths = new Set([...images, ...files.map((f) => f.path)]);
   const displayPaths = Array.from(allPaths);
@@ -146,7 +156,7 @@ export default function ImageManager({ entityId, thumbnail, images, onThumbnailC
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,.heic,.heif,.webp,.png,.jpg,.jpeg,.gif,.avif"
           multiple
           onChange={handleUpload}
           className="hidden"

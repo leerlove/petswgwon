@@ -96,7 +96,10 @@ export default function SectionEditor({ entityId, sections, onChange }: SectionE
 
     const newPaths: string[] = [];
     for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) continue;
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      const allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'heic', 'heif'];
+      if (!file.type.startsWith('image/') && !allowedExts.includes(ext)) continue;
+      if (file.size > 20 * 1024 * 1024) continue;
       const formData = new FormData();
       formData.append('file', file);
       formData.append('entityId', entityId);
@@ -132,7 +135,7 @@ export default function SectionEditor({ entityId, sections, onChange }: SectionE
         <span className="text-xs text-gray-400">{sections.length}개 섹션</span>
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" />
+      <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.webp,.png,.jpg,.jpeg,.gif,.avif" multiple onChange={handleFileUpload} className="hidden" />
 
       {sections.map((section, sIdx) => (
         <div key={sIdx} className="border border-gray-200 rounded-xl overflow-hidden">
