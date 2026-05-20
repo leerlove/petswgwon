@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           strategy="beforeInteractive"
         />
         <a href="#main-content" className="skip-nav">본문으로 건너뛰기</a>
-        <div id="main-content" className="mx-auto max-w-[430px] min-h-screen bg-surface relative shadow-2xl overflow-hidden">
+        <div id="main-content" className="min-h-dvh bg-surface relative overflow-hidden">
           {children}
         </div>
       </body>
