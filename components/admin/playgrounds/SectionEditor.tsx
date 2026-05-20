@@ -126,7 +126,15 @@ export default function SectionEditor({ entityId, sections, onChange }: SectionE
     updateItem(sectionIdx, itemIdx, { images });
   };
 
-  const getPreviewUrl = (path: string) => `/api/image/${path}`;
+  const SUPABASE_STORAGE_PREFIX = 'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image/';
+
+  const getPreviewUrl = (path: string) => {
+    if (path.startsWith(SUPABASE_STORAGE_PREFIX)) {
+      return `/api/image/${path.slice(SUPABASE_STORAGE_PREFIX.length)}?w=400`;
+    }
+    if (path.startsWith('http')) return path;
+    return `/api/image/${path}?w=400`;
+  };
 
   return (
     <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 space-y-4">
@@ -200,7 +208,7 @@ export default function SectionEditor({ entityId, sections, onChange }: SectionE
                     {item.images.map((img, imgIdx) => (
                       <div key={imgIdx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-100 group">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={getPreviewUrl(img)} alt="" className="w-full h-full object-cover" />
+                        <img src={getPreviewUrl(img)} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = ''; }} />
                         <button type="button" onClick={() => removeImage(sIdx, iIdx, imgIdx)}
                           className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                           <span className="text-white text-xs font-bold">✕</span>
