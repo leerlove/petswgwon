@@ -129,10 +129,10 @@ export default function ImageManager({ entityId, thumbnail, images, onThumbnailC
 
   const getPreviewUrl = (path: string) => {
     if (path.startsWith(SUPABASE_STORAGE_PREFIX)) {
-      return `/api/image/${path.slice(SUPABASE_STORAGE_PREFIX.length)}`;
+      return `/api/image/${path.slice(SUPABASE_STORAGE_PREFIX.length)}?w=400`;
     }
     if (path.startsWith('http')) return path;
-    return `/api/image/${path}`;
+    return `/api/image/${path}?w=400`;
   };
 
   const allPaths = new Set([...images, ...files.map((f) => f.path)]);
