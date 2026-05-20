@@ -6,7 +6,7 @@ import type { PlaygroundSection, SectionItem } from '@/types/playground';
 
 function getImageUrl(path: string) {
   if (path.startsWith('http')) return path;
-  return `/api/image/${path}`;
+  return `/api/image/${path}?w=1080`;
 }
 
 function ItemGallery({ item }: { item: SectionItem }) {

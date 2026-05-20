@@ -40,7 +40,7 @@ function PlaygroundImageGallery({ playground }: { playground: Playground }) {
 
   const getImageUrl = (url: string) => {
     if (url.startsWith('http')) return url;
-    return `/api/image/${url}`;
+    return `/api/image/${url}?w=1080`;
   };
 
   return (

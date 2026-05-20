@@ -176,7 +176,7 @@ export default function PlaygroundPage() {
                       <div className="relative w-full h-32 bg-gradient-to-br from-primary/15 to-primary-50 flex items-center justify-center overflow-hidden">
                         {pg.thumbnail ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={`/api/image/${pg.thumbnail}`} alt={pg.name} className="w-full h-full object-cover" />
+                          <img src={`/api/image/${pg.thumbnail}?w=640`} alt={pg.name} className="w-full h-full object-cover" loading="lazy" />
                         ) : (
                           <div className="text-center"><span className="text-4xl block">🏃</span><p className="text-xs text-primary-dark/60 mt-1 font-medium">{pg.name}</p></div>
                         )}
