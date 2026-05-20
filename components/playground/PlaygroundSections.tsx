@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, memo } from 'react';
-import Image from 'next/image';
 import type { PlaygroundSection, SectionItem } from '@/types/playground';
 
 function getImageUrl(path: string) {
@@ -21,12 +20,12 @@ function ItemGallery({ item }: { item: SectionItem }) {
         <div className="flex transition-transform duration-300 ease-out h-full" style={{ transform: `translateX(-${current * 100}%)` }}>
           {images.map((img, i) => (
             <div key={i} className="w-full shrink-0 h-full relative">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={getImageUrl(img)}
                 alt={`${item.name} ${i + 1}`}
-                fill
-                sizes="(max-width: 430px) 100vw, 430px"
-                className="object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
           ))}

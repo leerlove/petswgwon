@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
-import Image from 'next/image';
 import type { Playground } from '@/types/playground';
 
 const PRESETS = {
@@ -56,14 +55,13 @@ function PlaygroundImageGallery({ playground }: { playground: Playground }) {
                     <span className="text-sm font-medium text-warm-400">{PRESETS.labels[i % PRESETS.labels.length]}</span>
                   </div>
                 ) : (
-                  <Image
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
                     src={getImageUrl(img)}
                     alt={`${playground.name} ${i + 1}`}
-                    fill
-                    sizes="(max-width: 430px) 100vw, 430px"
-                    className="object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                     onError={() => handleImageError(i)}
-                    priority={i === 0}
+                    loading={i === 0 ? 'eager' : 'lazy'}
                   />
                 )}
               </div>
