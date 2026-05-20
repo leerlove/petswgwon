@@ -10,34 +10,32 @@ export const dynamic = 'force-dynamic';
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  // 병렬 데이터 조회
-  const [
-    { count: totalPlaces },
-    { count: totalReviews },
-    { count: totalBookmarks },
-    { count: noPhone },
-    { count: noBusinessHours },
-    { count: noImage },
-    { count: noPetEtiquette },
-    { data: recentUpdates },
-  ] = await Promise.all([
-    supabase.from('places').select('*', { count: 'exact', head: true }),
-    supabase.from('blog_reviews').select('*', { count: 'exact', head: true }),
-    supabase.from('bookmarks').select('*', { count: 'exact', head: true }),
-    supabase.from('places').select('*', { count: 'exact', head: true }).eq('phone', ''),
-    supabase.from('places').select('*', { count: 'exact', head: true }).eq('business_hours', {}),
-    supabase.from('places').select('*', { count: 'exact', head: true }).eq('thumbnail', ''),
-    supabase.from('places').select('*', { count: 'exact', head: true }).eq('pet_etiquette', '[]'),
+  // 통합 집계 RPC 1회 + 최근 수정 5건 (기존 13회 count(exact) 대체)
+  const [{ data: statsData }, { data: recentUpdates }] = await Promise.all([
+    supabase.rpc('admin_place_stats'),
     supabase.from('places').select('id, name, category, sub_category, updated_at').order('updated_at', { ascending: false }).limit(5),
   ]);
 
-  // 카테고리별 집계
-  const categoryCounts = await Promise.all(
-    categories.map(async (cat) => {
-      const { count } = await supabase.from('places').select('*', { count: 'exact', head: true }).eq('category', cat.id);
-      return { id: cat.id as CategoryType, name: cat.name, icon: cat.icon, count: count ?? 0 };
-    })
-  );
+  const stats = (statsData ?? {}) as {
+    total?: number; reviews?: number; bookmarks?: number;
+    no_phone?: number; no_hours?: number; no_image?: number; no_etiquette?: number;
+    by_category?: Record<string, number>;
+  };
+  const totalPlaces = stats.total ?? 0;
+  const totalReviews = stats.reviews ?? 0;
+  const totalBookmarks = stats.bookmarks ?? 0;
+  const noPhone = stats.no_phone ?? 0;
+  const noBusinessHours = stats.no_hours ?? 0;
+  const noImage = stats.no_image ?? 0;
+  const noPetEtiquette = stats.no_etiquette ?? 0;
+  const byCat = stats.by_category ?? {};
+
+  const categoryCounts = categories.map((cat) => ({
+    id: cat.id as CategoryType,
+    name: cat.name,
+    icon: cat.icon,
+    count: byCat[cat.id] ?? 0,
+  }));
 
   return (
     <div className="space-y-6">
