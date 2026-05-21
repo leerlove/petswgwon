@@ -155,6 +155,17 @@ export default function MapContainer() {
     return () => { cancelled = true; };
   }, []);
 
+  // SDK 로드 실패(가상 지도 모드) 시: 실제 지도가 없어 bounds가 없으므로
+  // 기본 위치 주변 장소를 직접 불러와 폴백 화면에 표시
+  useEffect(() => {
+    if (!sdkError) return;
+    const { lat, lng } = useMapStore.getState().mapCenter;
+    const span = 0.05;
+    const bounds: MapBounds = { swLat: lat - span, swLng: lng - span, neLat: lat + span, neLng: lng + span };
+    useMapStore.setState({ bounds });
+    triggerLoad(bounds);
+  }, [sdkError]);
+
   useEffect(() => {
     if (!sdkReady || !containerRef.current || mapRef.current) return;
     const map = new kakao.maps.Map(containerRef.current, {
