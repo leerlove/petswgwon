@@ -40,6 +40,27 @@ function triggerLoad(bounds: MapBounds) {
   });
 }
 
+// Zoom level applied when focusing on a precise location (URL param or geolocation).
+const DEFAULT_FOCUS_ZOOM = 19;
+
+// Coordinates handed to the webview by the host app (PetPass) via URL query params,
+// e.g. /petzone?lat=37.5065&lng=127.0350&zoom=18. Returns null when not supplied/invalid.
+function parseInitialCoords(): { lat: number; lng: number; zoom?: number } | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const latRaw = params.get('lat');
+  const lngRaw = params.get('lng');
+  if (latRaw === null || lngRaw === null) return null;
+  const lat = Number(latRaw);
+  const lng = Number(lngRaw);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  const zoomRaw = params.get('zoom');
+  const zoomNum = zoomRaw !== null ? Number(zoomRaw) : NaN;
+  const zoom = Number.isFinite(zoomNum) ? Math.max(10, Math.min(20, Math.round(zoomNum))) : undefined;
+  return { lat, lng, zoom };
+}
+
 function createMarkerContent(place: Place, isActive: boolean): string {
   const color = getCategoryColor(place.category);
   const icon = CAT_SVG[place.category] ?? CAT_SVG['etc'];
@@ -168,11 +189,18 @@ export default function MapContainer() {
 
   useEffect(() => {
     if (!sdkReady || !containerRef.current || mapRef.current) return;
+    // Location passed by the host app (PetPass) via URL params takes priority over the store default.
+    const initialCoords = parseInitialCoords();
+    const startCenter = initialCoords ?? mapCenter;
+    const startZoom = initialCoords ? (initialCoords.zoom ?? DEFAULT_FOCUS_ZOOM) : zoomLevel;
     const map = new kakao.maps.Map(containerRef.current, {
-      center: new kakao.maps.LatLng(mapCenter.lat, mapCenter.lng),
-      level: toKakaoLevel(zoomLevel),
+      center: new kakao.maps.LatLng(startCenter.lat, startCenter.lng),
+      level: toKakaoLevel(startZoom),
     });
     mapRef.current = map;
+    if (initialCoords) {
+      useMapStore.setState({ mapCenter: { lat: initialCoords.lat, lng: initialCoords.lng }, zoomLevel: startZoom });
+    }
 
     const idleHandler = () => {
       if (isSyncingRef.current) return;
@@ -200,7 +228,6 @@ export default function MapContainer() {
       useUIStore.getState().closeClusterList();
     });
 
-    // Initial load: use default bounds or geolocation
     const doInitialLoad = (m: kakao.maps.Map) => {
       setTimeout(() => {
         const bounds = getMapBounds(m);
@@ -209,25 +236,33 @@ export default function MapContainer() {
       }, 100);
     };
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setHasMyLocation(true);
-          map.setCenter(new kakao.maps.LatLng(lat, lng));
-          map.setLevel(5, { animate: false });
-          useMapStore.setState({ mapCenter: { lat, lng }, zoomLevel: 19 });
-          doInitialLoad(map);
-        },
-        () => {
-          // Geolocation denied/failed - load with default center
-          doInitialLoad(map);
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    } else {
+    if (initialCoords) {
+      // Host app supplied the location: it's already the map center. Load markers
+      // immediately and skip geolocation so we don't trigger a duplicate permission
+      // prompt or wait on a timeout that can't resolve inside the webview.
+      setHasMyLocation(true);
       doInitialLoad(map);
+    } else {
+      // No coords passed: render markers at the default center right away (don't block
+      // on geolocation), then recenter as an enhancement if/when geolocation resolves.
+      doInitialLoad(map);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setHasMyLocation(true);
+            map.setCenter(new kakao.maps.LatLng(lat, lng));
+            map.setLevel(toKakaoLevel(DEFAULT_FOCUS_ZOOM), { animate: false });
+            useMapStore.setState({ mapCenter: { lat, lng }, zoomLevel: DEFAULT_FOCUS_ZOOM });
+            doInitialLoad(map);
+          },
+          () => {
+            // Denied/failed — default center is already loaded, nothing to do.
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      }
     }
 
     return () => {
