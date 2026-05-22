@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('places')
-    .select('*', { count: 'exact' });
+    .select('*', { count: 'estimated' });
 
   if (category) query = query.eq('category', category);
   if (subCategory) query = query.eq('sub_category', subCategory);
