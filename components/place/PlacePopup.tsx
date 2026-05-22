@@ -4,16 +4,7 @@ import { useCallback, useRef, memo } from 'react';
 import { usePlaceStore } from '@/stores/placeStore';
 import { useUIStore } from '@/stores/uiStore';
 import { getSubCategoryName, getCategoryColor, CAT_EMOJI } from '@/data/categories';
-
-const SUPABASE_STORAGE_PREFIX = 'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image/';
-
-function toProxyUrl(url: string): string {
-  if (url.startsWith(SUPABASE_STORAGE_PREFIX)) {
-    return `/api/image/${url.slice(SUPABASE_STORAGE_PREFIX.length)}`;
-  }
-  if (!url.startsWith('http')) return `/api/image/${url}`;
-  return url;
-}
+import { proxyImageUrl } from '@/lib/imageProxy';
 
 function PlacePopup() {
   const places = usePlaceStore((s) => s.places);
@@ -88,7 +79,7 @@ function PlacePopup() {
           <div className="w-16 h-16 rounded-xl shrink-0 flex items-center justify-center text-[26px] relative overflow-hidden" style={{ backgroundColor: catColor + '12' }}>
             {popupPlace.thumbnail ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={toProxyUrl(popupPlace.thumbnail)} alt={popupPlace.name} className="w-full h-full object-cover" />
+              <img src={proxyImageUrl(popupPlace.thumbnail, 400)} alt={popupPlace.name} className="w-full h-full object-cover" />
             ) : (
               <span>{emoji}</span>
             )}

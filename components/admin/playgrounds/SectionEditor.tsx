@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react';
 import { SECTION_TYPE_LABELS } from '@/types/playground';
 import type { PlaygroundSection, SectionItem } from '@/types/playground';
+import { addImageToItem } from '@/lib/admin/sectionImages';
+import { proxyImageUrl } from '@/lib/imageProxy';
 
 interface SectionEditorProps {
   entityId: string;
@@ -12,6 +14,7 @@ interface SectionEditorProps {
 
 export default function SectionEditor({ entityId, sections, onChange }: SectionEditorProps) {
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<{ sectionIdx: number; itemIdx: number } | null>(null);
 
@@ -126,15 +129,19 @@ export default function SectionEditor({ entityId, sections, onChange }: SectionE
     updateItem(sectionIdx, itemIdx, { images });
   };
 
-  const SUPABASE_STORAGE_PREFIX = 'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image/';
-
-  const getPreviewUrl = (path: string) => {
-    if (path.startsWith(SUPABASE_STORAGE_PREFIX)) {
-      return `/api/image/${path.slice(SUPABASE_STORAGE_PREFIX.length)}?w=400`;
-    }
-    if (path.startsWith('http')) return path;
-    return `/api/image/${path}?w=400`;
+  // 상단 ImageManager 갤러리에서 드래그한 이미지를 섹션 항목에 추가 (재업로드 없이 경로 재사용)
+  const handleImageDrop = (sectionIdx: number, itemIdx: number, e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverKey(null);
+    const path =
+      e.dataTransfer.getData('application/x-petplace-image') ||
+      e.dataTransfer.getData('text/plain');
+    if (!path) return;
+    const current = sections[sectionIdx].items[itemIdx].images;
+    updateItem(sectionIdx, itemIdx, { images: addImageToItem(current, path) });
   };
+
+  const getPreviewUrl = (path: string) => proxyImageUrl(path, 400);
 
   return (
     <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 space-y-4">
@@ -201,10 +208,17 @@ export default function SectionEditor({ entityId, sections, onChange }: SectionE
                   </div>
                 </div>
 
-                {/* 이미지 */}
+                {/* 이미지 — 상단 갤러리에서 드래그해 넣을 수 있음 */}
                 <div>
-                  <label className={labelCls}>이미지 ({item.images.length}개)</label>
-                  <div className="flex gap-1.5 flex-wrap">
+                  <label className={labelCls}>이미지 ({item.images.length}개) · 상단 사진을 드래그해서 추가</label>
+                  <div
+                    data-testid={`section-dropzone-${sIdx}-${iIdx}`}
+                    aria-label="이미지 드롭 영역 — 상단 사진을 끌어다 놓으세요"
+                    onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setDragOverKey(`${sIdx}-${iIdx}`); }}
+                    onDragLeave={(e) => { if (e.currentTarget.contains(e.relatedTarget as Node)) return; setDragOverKey((k) => (k === `${sIdx}-${iIdx}` ? null : k)); }}
+                    onDrop={(e) => handleImageDrop(sIdx, iIdx, e)}
+                    className={`flex gap-1.5 flex-wrap rounded-lg p-1 -m-1 transition-colors ${dragOverKey === `${sIdx}-${iIdx}` ? 'ring-2 ring-amber-400 bg-amber-50' : ''}`}
+                  >
                     {item.images.map((img, imgIdx) => (
                       <div key={imgIdx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-100 group">
                         {/* eslint-disable-next-line @next/next/no-img-element */}

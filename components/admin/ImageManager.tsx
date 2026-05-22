@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { proxyImageUrl } from '@/lib/imageProxy';
 
 interface ImageFile {
   name: string;
@@ -125,15 +126,7 @@ export default function ImageManager({ entityId, thumbnail, images, onThumbnailC
     onThumbnailChange(path);
   };
 
-  const SUPABASE_STORAGE_PREFIX = 'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image/';
-
-  const getPreviewUrl = (path: string) => {
-    if (path.startsWith(SUPABASE_STORAGE_PREFIX)) {
-      return `/api/image/${path.slice(SUPABASE_STORAGE_PREFIX.length)}?w=400`;
-    }
-    if (path.startsWith('http')) return path;
-    return `/api/image/${path}?w=400`;
-  };
+  const getPreviewUrl = (path: string) => proxyImageUrl(path, 400);
 
   const allPaths = new Set([...images, ...files.map((f) => f.path)]);
   const displayPaths = Array.from(allPaths);
@@ -194,7 +187,18 @@ export default function ImageManager({ entityId, thumbnail, images, onThumbnailC
           {displayPaths.map((path) => {
             const isThumbnail = thumbnail === path;
             return (
-              <div key={path} className={`relative group rounded-xl overflow-hidden border-2 ${isThumbnail ? 'border-amber-500' : 'border-gray-100'}`}>
+              <div
+                key={path}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('application/x-petplace-image', path);
+                  e.dataTransfer.setData('text/plain', path);
+                  e.dataTransfer.effectAllowed = 'copy';
+                }}
+                title="드래그해서 아래 섹션 항목에 넣을 수 있어요"
+                aria-label="섹션으로 드래그할 수 있는 이미지"
+                className={`relative group rounded-xl overflow-hidden border-2 cursor-grab active:cursor-grabbing ${isThumbnail ? 'border-amber-500' : 'border-gray-100'}`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getPreviewUrl(path)}

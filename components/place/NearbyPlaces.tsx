@@ -5,16 +5,7 @@ import { usePlaceStore } from '@/stores/placeStore';
 import { useUIStore } from '@/stores/uiStore';
 import { getCategoryColor, CAT_EMOJI } from '@/data/categories';
 import type { Place } from '@/types';
-
-const SUPABASE_STORAGE_PREFIX = 'https://yngzeshxngfeyiabxeyi.supabase.co/storage/v1/object/public/place-image/';
-
-function toProxyUrl(url: string): string {
-  if (url.startsWith(SUPABASE_STORAGE_PREFIX)) {
-    return `/api/image/${url.slice(SUPABASE_STORAGE_PREFIX.length)}`;
-  }
-  if (!url.startsWith('http')) return `/api/image/${url}`;
-  return url;
-}
+import { proxyImageUrl } from '@/lib/imageProxy';
 
 function calcDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -50,7 +41,7 @@ function NearbyPlaces({ currentPlace }: { currentPlace: Place }) {
               <div className="h-[80px] flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: color + '12' }}>
                 {np.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={toProxyUrl(np.thumbnail)} alt={np.name} className="w-full h-full object-cover" />
+                  <img src={proxyImageUrl(np.thumbnail, 320)} alt={np.name} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-3xl">{CAT_EMOJI[np.category] ?? '📍'}</span>
                 )}

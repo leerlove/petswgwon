@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
-import Image from 'next/image';
 import type { Place, CategoryType } from '@/types';
+import { proxyImageUrl } from '@/lib/imageProxy';
 
 
 
@@ -46,10 +46,7 @@ function ImageGallery({ place }: { place: Place }) {
     }
   }, [total]);
 
-  const getImageUrl = (url: string) => {
-    if (url.startsWith('http')) return url;
-    return `/api/image/${url}`;
-  };
+  const getImageUrl = (url: string) => proxyImageUrl(url, 800);
 
   return (
     <div className="relative bg-warm-50">
@@ -64,14 +61,13 @@ function ImageGallery({ place }: { place: Place }) {
                     <span className="text-sm font-medium text-warm-400">{preset.labels[i % preset.labels.length]}</span>
                   </div>
                 ) : (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={getImageUrl(img)}
                     alt={`${place.name} ${i + 1}`}
-                    fill
-                    sizes="(max-width: 430px) 100vw, 430px"
-                    className="object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                     onError={() => handleImageError(i)}
-                    priority={i === 0}
+                    loading={i === 0 ? 'eager' : 'lazy'}
                   />
                 )}
               </div>
