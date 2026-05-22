@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareClient } from '@/lib/supabase/middleware';
+import { canAccessAdminPath, type AdminRole } from '@/lib/supabase/adminRole';
 
 const SUBDOMAIN_ROUTES: Record<string, string> = {
   petzone: '/petzone',
@@ -46,8 +47,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // 관리자 권한은 미들웨어에서 DB 조회하지 않음 (성능)
-  // → API 레이어의 requireAdmin()에서 체크
+  // 역할 기반 페이지 접근 제한 (playground 역할은 대시보드/놀이터 외 차단)
+  // 관리자 여부/세부 인가는 API 레이어 requireAdmin()이 최종 강제한다.
+  const { data: adminRow } = await supabase
+    .from('admin_users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  const role = adminRow?.role as AdminRole | undefined;
+  if (role && !canAccessAdminPath(role, request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL('/admin/playgrounds', request.url));
+  }
+
   return response;
 }
 

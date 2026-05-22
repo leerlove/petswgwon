@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/supabase/adminAuth';
+import { PLAYGROUND_ALLOWED_ROLES } from '@/lib/supabase/adminRole';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,7 +8,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
   const { id } = await params;
@@ -29,7 +30,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
   const { id } = await params;
@@ -55,7 +56,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
   const { id } = await params;

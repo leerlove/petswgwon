@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 import convertHeic from 'heic-convert';
 import { requireAdmin } from '@/lib/supabase/adminAuth';
+import { PLAYGROUND_ALLOWED_ROLES } from '@/lib/supabase/adminRole';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ const WEBP_QUALITY = 80;
  * 저장 경로: place-image/{entityId}/{timestamp}-{random}.webp
  */
 export async function POST(request: NextRequest) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
 
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
  * Body: { path: string }
  */
 export async function DELETE(request: NextRequest) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
 
@@ -115,7 +116,7 @@ export async function DELETE(request: NextRequest) {
  * Query: entityId
  */
 export async function GET(request: NextRequest) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
 

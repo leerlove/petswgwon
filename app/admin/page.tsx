@@ -1,20 +1,38 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { unstable_cache } from 'next/cache';
 import StatCard from '@/components/admin/dashboard/StatCard';
 import QualityAlert from '@/components/admin/dashboard/QualityAlert';
 import Link from 'next/link';
 import { categories, categoryColorMap } from '@/data/categories';
 import type { CategoryType } from '@/types';
+import { getCurrentAdminRole } from '@/lib/supabase/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminDashboardPage() {
-  const supabase = await createClient();
+const getAdminDashboardStats = unstable_cache(
+  async () => {
+    const supabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
+    const [{ data: statsData }, { data: recentUpdates }] = await Promise.all([
+      supabase.rpc('admin_place_stats'),
+      supabase
+        .from('places')
+        .select('id, name, category, sub_category, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(5),
+    ]);
+    return { statsData, recentUpdates };
+  },
+  ['admin-dashboard-stats'],
+  { revalidate: 300 },
+);
 
-  // 통합 집계 RPC 1회 + 최근 수정 5건 (기존 13회 count(exact) 대체)
-  const [{ data: statsData }, { data: recentUpdates }] = await Promise.all([
-    supabase.rpc('admin_place_stats'),
-    supabase.from('places').select('id, name, category, sub_category, updated_at').order('updated_at', { ascending: false }).limit(5),
-  ]);
+export default async function AdminDashboardPage() {
+  const { statsData, recentUpdates } = await getAdminDashboardStats();
+  // playground 역할은 장소 관리에 접근할 수 없으므로 장소로의 이동 링크를 막는다
+  const isPlayground = (await getCurrentAdminRole()) === 'playground';
 
   const stats = (statsData ?? {}) as {
     total?: number; reviews?: number; bookmarks?: number;
@@ -97,27 +115,44 @@ export default async function AdminDashboardPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-gray-900">최근 수정된 장소</h3>
-          <Link href="/admin/places" className="text-xs text-amber-600 hover:text-amber-700">
-            전체 보기 →
-          </Link>
+          {!isPlayground && (
+            <Link href="/admin/places" className="text-xs text-amber-600 hover:text-amber-700">
+              전체 보기 →
+            </Link>
+          )}
         </div>
         {recentUpdates && recentUpdates.length > 0 ? (
           <div className="divide-y divide-gray-100">
-            {recentUpdates.map((place) => (
-              <Link
-                key={place.id}
-                href={`/admin/places/${place.id}`}
-                className="flex items-center justify-between py-3 sm:py-2.5 hover:bg-gray-50 active:bg-gray-100 -mx-2 px-2 rounded transition-colors"
-              >
-                <div className="min-w-0 flex-1 mr-3">
-                  <p className="text-sm font-medium text-gray-900 truncate">{place.name}</p>
-                  <p className="text-xs text-gray-500">{place.category} / {place.sub_category}</p>
+            {recentUpdates.map((place) => {
+              const rowContent = (
+                <>
+                  <div className="min-w-0 flex-1 mr-3">
+                    <p className="text-sm font-medium text-gray-900 truncate">{place.name}</p>
+                    <p className="text-xs text-gray-500">{place.category} / {place.sub_category}</p>
+                  </div>
+                  <span className="text-xs text-gray-400 shrink-0">
+                    {new Date(place.updated_at).toLocaleDateString('ko-KR')}
+                  </span>
+                </>
+              );
+              // playground 역할은 장소 상세로 이동 불가 → 비링크(div)로 렌더
+              return isPlayground ? (
+                <div
+                  key={place.id}
+                  className="flex items-center justify-between py-3 sm:py-2.5 -mx-2 px-2"
+                >
+                  {rowContent}
                 </div>
-                <span className="text-xs text-gray-400 shrink-0">
-                  {new Date(place.updated_at).toLocaleDateString('ko-KR')}
-                </span>
-              </Link>
-            ))}
+              ) : (
+                <Link
+                  key={place.id}
+                  href={`/admin/places/${place.id}`}
+                  className="flex items-center justify-between py-3 sm:py-2.5 hover:bg-gray-50 active:bg-gray-100 -mx-2 px-2 rounded transition-colors"
+                >
+                  {rowContent}
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <p className="text-sm text-gray-400">최근 수정된 장소가 없습니다.</p>

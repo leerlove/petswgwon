@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { canAccessAdminPath, type AdminRole } from '@/lib/supabase/adminRole';
 
 const MENU_ITEMS = [
   { href: '/admin', label: '대시보드', icon: '📊' },
@@ -17,10 +18,16 @@ const MENU_ITEMS = [
 interface AdminSidebarProps {
   open: boolean;
   onClose: () => void;
+  role?: AdminRole | null;
 }
 
-export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
+export default function AdminSidebar({ open, onClose, role }: AdminSidebarProps) {
   const pathname = usePathname();
+
+  // 역할이 접근 가능한 메뉴만 노출 (role 미지정 시 전체 — 서버 가드가 최종 강제)
+  const menuItems = role
+    ? MENU_ITEMS.filter((item) => canAccessAdminPath(role, item.href))
+    : MENU_ITEMS;
 
   const isActive = (href: string) => {
     if (href === '/admin') return pathname === '/admin';
@@ -39,7 +46,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
 
       {/* 메뉴 */}
       <div className="flex-1 py-4 space-y-1 px-3 overflow-y-auto">
-        {MENU_ITEMS.map((item) => (
+        {menuItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}

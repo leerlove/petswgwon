@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentAdminRole } from '@/lib/supabase/adminAuth';
 import AdminShell from '@/components/admin/layout/AdminShell';
 
 export const metadata = {
@@ -28,9 +29,11 @@ export default async function AdminLayout({
     );
   }
 
+  const role = await getCurrentAdminRole();
+
   return (
     <div className="admin-layout-wrapper">
-      <AdminShell email={user.email ?? ''}>
+      <AdminShell email={user.email ?? ''} role={role}>
         {children}
       </AdminShell>
     </div>

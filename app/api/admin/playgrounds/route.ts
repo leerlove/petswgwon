@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/supabase/adminAuth';
+import { PLAYGROUND_ALLOWED_ROLES } from '@/lib/supabase/adminRole';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
 
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAdmin();
+  const auth = await requireAdmin(PLAYGROUND_ALLOWED_ROLES);
   if ('error' in auth) return auth.error;
   const { supabase } = auth;
 
