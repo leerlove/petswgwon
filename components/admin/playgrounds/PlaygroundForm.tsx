@@ -6,6 +6,7 @@ import { PLAYGROUND_TYPE_LABELS } from '@/types/playground';
 import type { PlaygroundType } from '@/types/playground';
 import ImageManager from '@/components/admin/ImageManager';
 import SectionEditor from '@/components/admin/playgrounds/SectionEditor';
+import { collectSectionImagePaths } from '@/lib/admin/sectionImages';
 import type { PlaygroundSection } from '@/types/playground';
 
 interface PlaygroundData {
@@ -224,6 +225,7 @@ export default function PlaygroundForm({ initialData, isNew = false }: Playgroun
           images={form.images}
           onThumbnailChange={(v) => updateField('thumbnail', v)}
           onImagesChange={(v) => updateField('images', v)}
+          excludePaths={Array.from(collectSectionImagePaths(form.sections))}
         />
       )}
       {!form.id && (

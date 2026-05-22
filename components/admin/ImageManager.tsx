@@ -16,9 +16,11 @@ interface ImageManagerProps {
   images: string[];
   onThumbnailChange: (path: string) => void;
   onImagesChange: (paths: string[]) => void;
+  /** 섹션에 배치되어 상단 갤러리에서 숨길 경로들 (드래그로 섹션 이동된 이미지) */
+  excludePaths?: string[];
 }
 
-export default function ImageManager({ entityId, thumbnail, images, onThumbnailChange, onImagesChange }: ImageManagerProps) {
+export default function ImageManager({ entityId, thumbnail, images, onThumbnailChange, onImagesChange, excludePaths }: ImageManagerProps) {
   const [files, setFiles] = useState<ImageFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -128,8 +130,11 @@ export default function ImageManager({ entityId, thumbnail, images, onThumbnailC
 
   const getPreviewUrl = (path: string) => proxyImageUrl(path, 400);
 
-  const allPaths = new Set([...images, ...files.map((f) => f.path)]);
-  const displayPaths = Array.from(allPaths);
+  // 섹션에 배치된 이미지는 상단 갤러리에서 숨김 (드래그로 섹션 이동됨)
+  const excludeSet = new Set(excludePaths ?? []);
+  const displayPaths = Array.from(new Set([...images, ...files.map((f) => f.path)])).filter(
+    (p) => !excludeSet.has(p)
+  );
 
   const inputCls = 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-amber-500 outline-none';
 

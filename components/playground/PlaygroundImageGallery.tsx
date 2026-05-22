@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect, memo } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo, memo } from 'react';
 import type { Playground } from '@/types/playground';
+import { excludeSectionImages } from '@/lib/admin/sectionImages';
 
 const PRESETS = {
   gradients: ['from-green-100 to-emerald-50', 'from-emerald-50 to-teal-50', 'from-lime-50 to-green-50', 'from-teal-50 to-cyan-50', 'from-green-50 to-yellow-50'],
@@ -15,7 +16,11 @@ function PlaygroundImageGallery({ playground }: { playground: Playground }) {
   const touchStartRef = useRef(0);
   const touchDiffRef = useRef(0);
 
-  const images = playground.images?.length > 0 ? playground.images : [];
+  // 섹션에 배치된 이미지는 상단 갤러리에서 제외 (섹션으로 "이동"된 것으로 간주)
+  const images = useMemo(
+    () => excludeSectionImages(playground.images, playground.sections),
+    [playground.images, playground.sections]
+  );
   const hasImages = images.length > 0;
   const total = hasImages ? images.length : 5;
 

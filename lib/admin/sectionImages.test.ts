@@ -1,5 +1,40 @@
 import { describe, it, expect } from 'vitest';
-import { addImageToItem } from './sectionImages';
+import { addImageToItem, collectSectionImagePaths, excludeSectionImages } from './sectionImages';
+import type { PlaygroundSection } from '@/types/playground';
+
+const sections: PlaygroundSection[] = [
+  { type: 'rooms', title: '객실', items: [
+    { name: 'A', images: ['e/2.webp', 'e/3.webp'] },
+    { name: 'B', images: ['e/5.webp'] },
+  ] },
+  { type: 'facilities', title: '부대시설', items: [
+    { name: 'C', images: [] },
+  ] },
+];
+
+describe('collectSectionImagePaths', () => {
+  it('모든 섹션/항목의 이미지 경로를 모은다', () => {
+    expect(collectSectionImagePaths(sections)).toEqual(new Set(['e/2.webp', 'e/3.webp', 'e/5.webp']));
+  });
+  it('빈/누락 입력은 빈 집합', () => {
+    expect(collectSectionImagePaths(undefined)).toEqual(new Set());
+    expect(collectSectionImagePaths([])).toEqual(new Set());
+  });
+});
+
+describe('excludeSectionImages', () => {
+  it('섹션에 배치된 이미지는 제외하고 순서를 유지한다', () => {
+    const images = ['e/1.webp', 'e/2.webp', 'e/3.webp', 'e/4.webp', 'e/5.webp'];
+    expect(excludeSectionImages(images, sections)).toEqual(['e/1.webp', 'e/4.webp']);
+  });
+  it('섹션이 없으면 전체를 그대로 반환', () => {
+    expect(excludeSectionImages(['e/1.webp'], [])).toEqual(['e/1.webp']);
+    expect(excludeSectionImages(['e/1.webp'], undefined)).toEqual(['e/1.webp']);
+  });
+  it('images가 없으면 빈 배열', () => {
+    expect(excludeSectionImages(undefined, sections)).toEqual([]);
+  });
+});
 
 describe('addImageToItem', () => {
   it('빈 목록에 새 경로를 추가한다', () => {
