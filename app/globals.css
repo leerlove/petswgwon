@@ -213,3 +213,23 @@ body {
     overflow: auto;
   }
 }
+
+/* iOS 16.0–16.1 Safari (PetPass webview 포함) 그라데이션 fallback.
+   Tailwind v4는 bg-gradient-* 를 `linear-gradient(... in oklab, ...)` 로 컴파일하는데
+   `in oklab` 색공간 보간 힌트는 Safari 16.2+ 부터 지원된다. 16.1 이하에서는 전체
+   linear-gradient() 파싱이 실패해 background-image 가 사라진다(흰 배경 + 흰 글씨).
+   `--tw-gradient-position` 변수에서 `in oklab` 부분만 떼어내면, 색상 변수
+   (--tw-gradient-from/via/to) 들은 Tailwind 자체 @supports color-mix fallback 으로
+   이미 안전하기 때문에 그라데이션이 정상 렌더된다.
+   @supports not (...) 안에 있어 16.2+ / 최신 브라우저에서는 규칙이 적용되지 않는다
+   (사이드 이펙트 zero). */
+@supports not (background: linear-gradient(in oklab, red, blue)) {
+  .bg-gradient-to-t  { --tw-gradient-position: to top; }
+  .bg-gradient-to-tr { --tw-gradient-position: to top right; }
+  .bg-gradient-to-r  { --tw-gradient-position: to right; }
+  .bg-gradient-to-br { --tw-gradient-position: to bottom right; }
+  .bg-gradient-to-b  { --tw-gradient-position: to bottom; }
+  .bg-gradient-to-bl { --tw-gradient-position: to bottom left; }
+  .bg-gradient-to-l  { --tw-gradient-position: to left; }
+  .bg-gradient-to-tl { --tw-gradient-position: to top left; }
+}
