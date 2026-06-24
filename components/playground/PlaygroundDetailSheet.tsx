@@ -127,15 +127,9 @@ function PlaygroundDetailSheet({ playground, isOpen, onClose }: Props) {
 
             {/* 기본 정보 헤더 */}
             <div className="px-4 pt-4 pb-3">
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-1.5">
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${badge.color}`}>{badge.label}</span>
-                  <span className="text-xs text-warm-500">{formatRelativeDate(playground.updated_at)}</span>
-                </div>
-                <button className="text-[11px] text-primary font-medium hover:text-primary-dark transition-colors min-h-[32px] flex items-center gap-0.5">
-                  <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  정보 수정 요청
-                </button>
+              <div className="flex items-center gap-1.5 mb-2.5">
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${badge.color}`}>{badge.label}</span>
+                <span className="text-xs text-warm-500">{formatRelativeDate(playground.updated_at)}</span>
               </div>
               <h1 className="text-xl font-bold text-warm-900 leading-tight line-clamp-2">{playground.name}</h1>
               <div className="flex gap-1.5 mt-3 flex-wrap">
@@ -205,24 +199,6 @@ function PlaygroundDetailSheet({ playground, isOpen, onClose }: Props) {
             <div className="px-4 py-4">
               <h3 className="font-bold text-[15px] text-warm-900 mb-3 flex items-center gap-2"><span className="text-lg">🗺️</span>놀이터 위치</h3>
               <MiniMap lat={playground.lat} lng={playground.lng} name={playground.name} height={180} />
-            </div>
-
-            {/* 수정 요청 */}
-            <div className="px-4 pb-4">
-              <div className="bg-gradient-to-r from-primary-50 to-warm-50 rounded-2xl p-4 border border-primary/15">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" className="text-primary" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-bold text-warm-900">잘못된 정보가 있나요?</p>
-                    <p className="text-[11px] text-warm-500 mt-0.5">변경된 정보를 알려주시면 빠르게 반영할게요</p>
-                  </div>
-                  <button className="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark transition-colors press-scale shrink-0 shadow-sm shadow-primary/20">
-                    수정 요청
-                  </button>
-                </div>
-              </div>
             </div>
 
             <div className="h-2 bg-surface-container" />
