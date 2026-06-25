@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useUIStore } from '@/stores/uiStore';
 import { useMagazineStore, type MagazinePlace, type MagazinePost } from '@/stores/magazineStore';
 import { SkeletonBox } from '@/components/ui/Skeleton';
@@ -37,6 +38,7 @@ function getEngagementLabel(likeCount: number, createdAt: string): string {
 }
 
 export default function HotPlacePage() {
+  const searchParams = useSearchParams();
   const openDetail = useUIStore((s) => s.openDetail);
   const posts = useMagazineStore((s) => s.posts);
   const isLoading = useMagazineStore((s) => s.isLoading);
@@ -51,6 +53,14 @@ export default function HotPlacePage() {
   useEffect(() => {
     loadPosts();
   }, [loadPosts]);
+
+  // ?post=<id> deep link: auto-open the target post once loaded
+  const postParam = searchParams.get('post');
+  useEffect(() => {
+    if (!postParam || posts.length === 0) return;
+    const target = posts.find((p) => p.id === postParam);
+    if (target) setViewingPost(target);
+  }, [postParam, posts]);
 
   const now = Date.now();
 
