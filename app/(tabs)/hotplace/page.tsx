@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { Suspense, useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useUIStore } from '@/stores/uiStore';
 import { useMagazineStore, type MagazinePlace, type MagazinePost } from '@/stores/magazineStore';
@@ -37,8 +37,30 @@ function getEngagementLabel(likeCount: number, createdAt: string): string {
   return '';
 }
 
-export default function HotPlacePage() {
+/**
+ * ?post=<id> 딥링크를 처리하는 비표시(null 렌더) 자식.
+ * useSearchParams를 쓰는 유일 지점이므로 Suspense 경계 안에서만 렌더해
+ * 정적 prerender bailout(빌드 실패)을 피한다. 통신사 경로는 ?post를 안 보내
+ * 므로 동작/출력에 영향 없음.
+ */
+function PostDeepLinkOpener({
+  posts,
+  onOpen,
+}: {
+  posts: MagazinePost[];
+  onOpen: (post: MagazinePost) => void;
+}) {
   const searchParams = useSearchParams();
+  const postParam = searchParams.get('post');
+  useEffect(() => {
+    if (!postParam || posts.length === 0) return;
+    const target = posts.find((p) => p.id === postParam);
+    if (target) onOpen(target);
+  }, [postParam, posts, onOpen]);
+  return null;
+}
+
+export default function HotPlacePage() {
   const openDetail = useUIStore((s) => s.openDetail);
   const posts = useMagazineStore((s) => s.posts);
   const isLoading = useMagazineStore((s) => s.isLoading);
@@ -53,14 +75,6 @@ export default function HotPlacePage() {
   useEffect(() => {
     loadPosts();
   }, [loadPosts]);
-
-  // ?post=<id> deep link: auto-open the target post once loaded
-  const postParam = searchParams.get('post');
-  useEffect(() => {
-    if (!postParam || posts.length === 0) return;
-    const target = posts.find((p) => p.id === postParam);
-    if (target) setViewingPost(target);
-  }, [postParam, posts]);
 
   const now = Date.now();
 
@@ -146,6 +160,9 @@ export default function HotPlacePage() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <PostDeepLinkOpener posts={posts} onOpen={setViewingPost} />
+      </Suspense>
       {/* ─── 글 상세 읽기 뷰 ─── */}
       {viewingPost && (
         <PostDetailView
